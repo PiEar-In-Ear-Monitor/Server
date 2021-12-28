@@ -13,24 +13,21 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //******************************************************************************
 
+#include "gtest/gtest.h"
 #include "click.h"
-#include <chrono>
+#include <thread>
 
-/**
- * Is a continual loop where output will indicate when the click should "click"
- * @param cpm Is an int pointer that indicates the clicks-per-minute
- * @param output Is an bool pointer to the expected output
- */
-void mainloop_click(int *cpm, bool *output) {
-    #pragma clang diagnostic push
-    #pragma ide diagnostic ignored "EndlessLoop"
-    while(1) {
-        *output = true;
-        // From https://stackoverflow.com/questions/45442963/how-to-execute-a-while-loop-for-exactly-60-seconds-in-c
-        auto time_start = std::chrono::system_clock::now();
-        while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - time_start).count() < (60.0 / (double) *cpm)) {
-            *output = false;
-        }
-    }
-    #pragma clang diagnostic pop
+TEST(testPiEar, testClick) {
+    int cpm = 360;
+    bool active = false, end = false;
+    std::thread click(mainloop_click, &cpm, &active, &end);
+    while (!active) {}
+    end = true;
+    click.join();
+    EXPECT_EQ(true, active);
+}
+
+int main(int argc, char **argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

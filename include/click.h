@@ -13,16 +13,9 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //******************************************************************************
 
-#include "server.h"
-#include "click.h"
-#include "audio.h"
-#include <thread>
+#ifndef PIEAR_SERVER_CLICK_H
+#define PIEAR_SERVER_CLICK_H
 
-int main(int argc, char *argv[]){
-    // Click
-    int *cpm;
-    bool *click_output;
-    *cpm = 100;
-    std::thread click(mainloop_click, cpm, click_output);
+void mainloop_click(int*, bool*, bool*);
 
-}
+#endif //PIEAR_SERVER_CLICK_H
