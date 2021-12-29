@@ -13,14 +13,27 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //******************************************************************************
 
-#include "multicast-server.h"
-#include "click.h"
-#include "audio.h"
-#include <thread>
+//#include "multicast-server.h"
+#include <Poco/Net/SocketAddress.h>
+#include <Poco/Net/MulticastSocket.h>
+#include <Poco/Net/NetException.h>
+#include <iostream>
 
-int main(int argc, char *argv[]){
-    // Click
-    int cpm = 1;
-    bool click_output, end_click = false;
-    std::thread click(mainloop_click, &cpm, &click_output, &end_click);
+int main(int argc, char* argv[]) {
+    Poco::Net::initializeNetwork();
+    try {
+        Poco::Net::SocketAddress address(Poco::Net::IPAddress(), 6666);
+        Poco::Net::MulticastSocket socket(address, true);
+
+        Poco::Net::SocketAddress sendto(Poco::Net::IPAddress(), 6666);
+        socket.connect(sendto);
+        std::cout << "Sending Hello" << std::endl;
+
+        socket.sendBytes("Hello", 6);
+        std::cout << "4" << std::endl << std::flush;
+    }
+    catch(const Poco::Net::NetException& ex) {
+        std::cout << ex.displayText() << std::endl << std::flush;
+    }
+    Poco::Net::uninitializeNetwork();
 }
