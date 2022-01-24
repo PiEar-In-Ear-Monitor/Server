@@ -34,3 +34,5 @@
 /cmake-build-release/
 /docs/
 /.idea/
+
+build/
