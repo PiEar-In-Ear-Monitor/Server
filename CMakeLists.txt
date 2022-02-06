@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
-add_executable(PiEar src/multicast-server.cpp)
+add_executable(PiEar ${SOURCES})
 target_link_libraries(PiEar pthread PocoNet PocoFoundation)
 
 enable_testing()

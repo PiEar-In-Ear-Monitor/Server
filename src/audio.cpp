@@ -13,15 +13,8 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //******************************************************************************
 
-#include "multicast-server.h"
-#include "http-server.h"
-#include "click.h"
-#include "audio.h"
-#include <thread>
+//
+// Created by alex on 12/28/21.
+//
 
-int main(int argc, char *argv[]){
-    // Click
-    int cpm = 1;
-    bool click_output, end_click = false;
-    std::thread click(mainloop_click, &cpm, &click_output, &end_click);
-}
+#include "audio.h"

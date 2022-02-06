@@ -1,9 +1,9 @@
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "PiEar"
+PROJECT_NAME           = "PiEar Server"
 PROJECT_NUMBER         = 1.0
 PROJECT_BRIEF          = Modern In-Ear solution
-PROJECT_LOGO           =
+PROJECT_LOGO           = icon.png
 OUTPUT_DIRECTORY       = docs
 CREATE_SUBDIRS         = NO
 ALLOW_UNICODE_NAMES    = NO
@@ -36,7 +36,7 @@ INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
 ALIASES                =
-OPTIMIZE_OUTPUT_FOR_C  = YES
+OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = NO
 OPTIMIZE_OUTPUT_VHDL   = NO
@@ -52,13 +52,13 @@ IDL_PROPERTY_SUPPORT   = YES
 DISTRIBUTE_GROUP_DOC   = NO
 GROUP_NESTED_COMPOUNDS = NO
 SUBGROUPING            = YES
-INLINE_GROUPED_CLASSES = NO
+INLINE_GROUPED_CLASSES = YES
 INLINE_SIMPLE_STRUCTS  = NO
 TYPEDEF_HIDES_STRUCT   = NO
 LOOKUP_CACHE_SIZE      = 0
 NUM_PROC_THREADS       = 1
 EXTRACT_ALL            = YES
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 EXTRACT_PRIV_VIRTUAL   = NO
 EXTRACT_PACKAGE        = NO
 EXTRACT_STATIC         = NO
@@ -106,7 +106,7 @@ WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            = "$file:$line: $text"
 WARN_LOGFILE           =
-INPUT                  = src
+INPUT                  = include
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cpp \
@@ -114,7 +114,7 @@ FILE_PATTERNS          = *.c \
                          *.hpp \
                          *.markdown \
                          *.md \
-RECURSIVE              = YES
+RECURSIVE              = NO
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =

@@ -13,16 +13,10 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //******************************************************************************
 
+
 #include "click.h"
 #include <chrono>
-#include <sys/time.h>
-#include <ctime>
 
-/**
- * Is a continual loop where output will indicate when the click should "click"
- * @param cpm Is an int pointer that indicates the clicks-per-minute - SHOULD NEVER EQUAL 0
- * @param output Is an bool pointer to the expected output
- */
 void mainloop_click(int *cpm, bool *output, bool *end_main) {
     while(!*end_main) {
         // From https://stackoverflow.com/questions/45442963/how-to-execute-a-while-loop-for-exactly-60-seconds-in-c

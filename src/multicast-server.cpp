@@ -13,24 +13,21 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //******************************************************************************
 
-//#include "multicast-server.h"
+#include "multicast-server.h"
 #include <Poco/Net/SocketAddress.h>
 #include <Poco/Net/MulticastSocket.h>
 #include <Poco/Net/NetException.h>
 #include <iostream>
 
-int main(int argc, char* argv[]) {
+void mainloop_multicast_server(int num_of_audio_streams) {
     Poco::Net::initializeNetwork();
     try {
-        Poco::Net::SocketAddress address(Poco::Net::IPAddress(), 6666);
-        Poco::Net::MulticastSocket socket(address, true);
-
-        Poco::Net::SocketAddress sendto(Poco::Net::IPAddress(), 6666);
+        Poco::Net::SocketAddress address(Poco::Net::IPAddress(), 6666), sendto(Poco::Net::IPAddress(), 6666);
+        Poco::Net::MulticastSocket socket(address);
         socket.connect(sendto);
-        std::cout << "Sending Hello" << std::endl;
 
-        socket.sendBytes("Hello", 6);
-        std::cout << "4" << std::endl << std::flush;
+        std::cout << "Sending Hello" << std::endl;
+        socket.sendBytes("Hello", 5);
     }
     catch(const Poco::Net::NetException& ex) {
         std::cout << ex.displayText() << std::endl << std::flush;
