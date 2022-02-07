@@ -28,6 +28,7 @@ inline bool json_data::load_data(int number_of_channels) {
     if (!data) {
         return load_default();
     }
+    // TODO check number_of_channels
     return true;
 }
 
@@ -41,13 +42,18 @@ inline bool json_data::load_default() {
 
 inline bool json_data::new_json(){
     data = json_object_new_object();
-    array = json_object_new_array();
+    json_object *array = json_object_new_array();
     json_object_array_add(data, array);
+    json_object_put(array);
     return (data && array);
 }
 
 std::string json_data::get_channel_name(int channel_index) {
-
+//    struct array_list *arry = json_object_get_array(array);
+//    for (int i = 0; i < arry->length; ++i) {
+//        struct json_object *row = (struct json_object*)array_list_get_idx(arry,i);
+//        if
+//    }
 }
 
 bool json_data::set_channel_name(int channel_index, std::string *channel_name) {

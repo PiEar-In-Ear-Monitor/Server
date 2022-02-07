@@ -25,14 +25,13 @@
  */
 class json_data {
 private:
-    struct json_object *array;
     inline bool load_data(int);
     inline bool load_default();
     inline bool new_json();
     void init();
 public:
     std::string filename;
-    struct json_object *data;
+    json_object *data;
     std::string get_channel_name(int);
     bool set_channel_name(int, std::string*);
     explicit json_data(std::string, int);
