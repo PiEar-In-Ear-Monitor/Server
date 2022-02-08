@@ -17,13 +17,12 @@
 #include "click.h"
 #include <chrono>
 
-void mainloop_click(int *cpm, bool *output, bool *end_main) {
-    while(!*end_main) {
-        // From https://stackoverflow.com/questions/45442963/how-to-execute-a-while-loop-for-exactly-60-seconds-in-c
-        long double time_start = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-        long double curr_time = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-        while ((curr_time - time_start) < (60.0 / (double) *cpm)) {
-            curr_time = duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+void mainloop_click(int *cpm, bool *output, bool *end) {
+    while(!*end) {
+        auto start_time = std::chrono::system_clock::now();
+        auto curr_time = std::chrono::system_clock::now();
+        while (std::chrono::duration<double>(curr_time - start_time).count() < (60.0 / (double) *cpm)) {
+            curr_time = std::chrono::system_clock::now();
             *output = false;
         }
         *output = true;

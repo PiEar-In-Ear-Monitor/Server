@@ -22,18 +22,14 @@ add_executable(PiEar_Test_multicast_server tests/test_multicast-server.cpp)
 target_link_libraries(PiEar_Test_multicast_server gtest gtest_main)
 add_test(NAME test_multicast_server COMMAND PiEar_Test_multicast_server)
 
-add_executable(PiEar_Test_task src/task.cpp tests/test_task.cpp)
-target_link_libraries(PiEar_Test_task gtest gtest_main)
+add_executable(PiEar_Test_task src/channel.cpp tests/test_task.cpp)
+target_link_libraries(PiEar_Test_task gtest gtest_main pthread boost_filesystem boost_system)
 add_test(NAME test_task COMMAND PiEar_Test_task)
 
-add_executable(PiEar_Test_json_data src/json_data.cpp tests/test_json_data.cpp)
-target_link_libraries(PiEar_Test_json_data gtest gtest_main)
-add_test(NAME test_json_data COMMAND PiEar_Test_json_data)
+add_executable(PiEar_Test_channel src/channel.cpp tests/test_channel.cpp)
+target_link_libraries(PiEar_Test_channel gtest gtest_main)
+add_test(NAME test_channel COMMAND PiEar_Test_channel)
 
 # add_executable(PiEar_Test_http_server tests/test_http-server.cpp)
 # target_link_libraries(PiEar_Test_http_server gtest gtest_main)
 # add_test(NAME test_http_server COMMAND PiEar_Test_http_server)
-
-add_executable(PiEar_Test_new_feature tests/test.cpp)
-target_link_libraries(PiEar_Test_new_feature sqlite3)
-add_test(NAME test_new_feature COMMAND PiEar_Test_new_featue)
