@@ -31,8 +31,8 @@ target_link_libraries(PiEar_Test_channel gtest gtest_main)
 add_test(NAME test_channel COMMAND PiEar_Test_channel)
 
 add_executable(PiEar_Test_load src/load-data.cpp tests/test_load-data.cpp)
-target_link_libraries(PiEar_Test_Load gtest gtest_main)
-add_test(NAME test_load COMMAND PiEar_Test_Load)
+target_link_libraries(PiEar_Test_load gtest gtest_main)
+add_test(NAME test_load COMMAND PiEar_Test_load)
 
 # add_executable(PiEar_Test_http_server tests/test_http-server.cpp)
 # target_link_libraries(PiEar_Test_http_server gtest gtest_main)
