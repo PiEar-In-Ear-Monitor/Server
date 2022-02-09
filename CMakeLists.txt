@@ -30,7 +30,7 @@ add_executable(PiEar_Test_channel src/channel.cpp tests/test_channel.cpp)
 target_link_libraries(PiEar_Test_channel gtest gtest_main)
 add_test(NAME test_channel COMMAND PiEar_Test_channel)
 
-add_executable(PiEar_Test_load src/load-data.cpp tests/test_load-data.cpp)
+add_executable(PiEar_Test_load src/channel.cpp src/load-data.cpp tests/test_load-data.cpp)
 target_link_libraries(PiEar_Test_load gtest gtest_main)
 add_test(NAME test_load COMMAND PiEar_Test_load)
 
