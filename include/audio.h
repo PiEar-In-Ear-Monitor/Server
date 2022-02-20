@@ -16,6 +16,8 @@
 #ifndef PIEAR_SERVER_AUDIO_H
 #define PIEAR_SERVER_AUDIO_H
 
+namespace PiEar {
 
+}
 
 #endif //PIEAR_SERVER_AUDIO_H

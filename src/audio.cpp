@@ -16,5 +16,8 @@
 //
 // Created by alex on 12/28/21.
 //
-
 #include "audio.h"
+
+namespace PiEar {
+
+}
