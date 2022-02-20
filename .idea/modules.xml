@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/PiEar-Server.iml" filepath="$PROJECT_DIR$/.idea/PiEar-Server.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/PiEar_Server.iml" filepath="$PROJECT_DIR$/.idea/PiEar_Server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Server.iml" filepath="$PROJECT_DIR$/.idea/Server.iml" />
     </modules>
   </component>
 </project>
