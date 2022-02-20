@@ -16,43 +16,42 @@
 #ifndef PIEAR_SERVER_MULTICAST_SERVER_H
 #define PIEAR_SERVER_MULTICAST_SERVER_H
 
-#include <Poco/Net/SocketAddress.h>
-#include <Poco/Net/MulticastSocket.h>
+namespace PiEar {
+    /**
+     * This will create the multicast server
+     *
+     * This will continually stream the audio streams
+     * @param audio_streams Pointer to all audio streams
+     * @param click_stream  Pointer to the click's stream
+     * @param end Pointer to a bool that, when set to false, will kill the server
+     */
+    void mainloop_multicast_server(int *audio_streams, bool *click_stream, bool *end);
 
-/**
- * This will create the multicast server
- *
- * This will continually stream the audio streams
- * @param audio_streams Pointer to all audio streams
- * @param click_stream  Pointer to the click's stream
- * @param end Pointer to a bool that, when set to false, will kill the server
- */
-void mainloop_multicast_server(int *audio_streams, bool *click_stream, bool *end);
+    /**
+     * Creates the Multicast server
+     *
+     * @return Pointer to a new Poco::Net::MulticastSocket
+     */
+    void make_server();
 
-/**
- * Creates the Multicast server
- *
- * @return Pointer to a new Poco::Net::MulticastSocket
- */
-Poco::Net::MulticastSocket *make_server();
+    /**
+     * Package data from audio streams
+     *
+     * Into spec compliant char*
+     * @param chars_to_return The end length of all packaged data
+     * @param audio_streams The audio streams
+     * @param click_stream The click stream
+     * @return Spec compliant char*
+     */
+    unsigned char* package_data(int chars_to_return, int *audio_streams, bool *click_stream);
 
-/**
- * Package data from audio streams
- *
- * Into spec compliant char*
- * @param chars_to_return The end length of all packaged data
- * @param audio_streams The audio streams
- * @param click_stream The click stream
- * @return Spec compliant char*
- */
-unsigned char* package_data(int chars_to_return, int *audio_streams, bool *click_stream);
-
-/**
- * Handles sending data
- * @param socket Socket to send data on
- * @param data Data to send
- * @return Success
- */
-bool send_data(Poco::Net::MulticastSocket socket, unsigned char *data);
+    /**
+     * Handles sending data
+     * @param socket Socket to send data on
+     * @param data Data to send
+     * @return Success
+     */
+    bool send_data(void *socket, unsigned char *data);
+}
 
 #endif //PIEAR_SERVER_MULTICAST_SERVER_H

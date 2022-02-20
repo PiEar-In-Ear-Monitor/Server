@@ -43,8 +43,3 @@ TEST(testPiEar, channel_string_test) {
     to_test.channel_name = std::string("New Name");
     EXPECT_EQ((std::string)to_test, std::string("{\"pipewire_id\":2,\"piear_id\":4,\"channel_name\":\"New Name\",\"enabled\":false}"));
 }
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

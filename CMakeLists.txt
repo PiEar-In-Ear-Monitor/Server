@@ -1,39 +1,28 @@
 cmake_minimum_required(VERSION 3.21)
 project(PiEar_Server VERSION 1.0)
-
 set(CMAKE_CXX_STANDARD 20)
+
+option(PACKAGE_TESTS "Build the tests" ON)
 
 include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
 add_executable(PiEar ${SOURCES})
-target_link_libraries(PiEar pthread PocoNet PocoFoundation sqlite3)
+target_link_libraries(PiEar pthread boost_filesystem boost_system)
 
-enable_testing()
+if(PACKAGE_TESTS)
+    enable_testing()
+    include(GoogleTest)
+    macro(package_add_test TEST_NAME)
+        add_executable(${TEST_NAME} ${ARGN})
+        target_link_libraries(${TEST_NAME} gtest gtest_main pthread boost_filesystem boost_system)
+        gtest_discover_tests(${TEST_NAME})
+    endmacro()
 
-add_executable(PiEar_Test_click src/click.cpp tests/test_click.cpp)
-target_link_libraries(PiEar_Test_click gtest gtest_main pthread)
-add_test(NAME test_click COMMAND PiEar_Test_click)
+    package_add_test(Click_Test src/click.cpp tests/test_click.cpp)
+    package_add_test(Channel_Test src/channel.cpp tests/test_channel.cpp)
+    package_add_test(Multicast_Test src/multicast-server.cpp tests/test_multicast-server.cpp)
+    package_add_test(Audio_Test src/audio.cpp tests/test_audio.cpp)
+    package_add_test(Http_Server_Test src/http-server.cpp tests/test_http-server.cpp)
+    package_add_test(Save_Load_Data_Test src/channel.cpp src/load-data.cpp tests/test_save_load_data.cpp)
+endif()
 
-# add_executable(PiEar_Test_audio tests/test_audio.cpp)
-# target_link_libraries(PiEar_Test_audio gtest gtest_main)
-# add_test(NAME test_audio COMMAND PiEar_Test_audio)
-
-add_executable(PiEar_Test_multicast_server tests/test_multicast-server.cpp)
-target_link_libraries(PiEar_Test_multicast_server gtest gtest_main)
-add_test(NAME test_multicast_server COMMAND PiEar_Test_multicast_server)
-
-add_executable(PiEar_Test_task src/channel.cpp tests/test_task.cpp)
-target_link_libraries(PiEar_Test_task gtest gtest_main pthread boost_filesystem boost_system)
-add_test(NAME test_task COMMAND PiEar_Test_task)
-
-add_executable(PiEar_Test_channel src/channel.cpp tests/test_channel.cpp)
-target_link_libraries(PiEar_Test_channel gtest gtest_main)
-add_test(NAME test_channel COMMAND PiEar_Test_channel)
-
-add_executable(PiEar_Test_load src/load-data.cpp tests/test_load-data.cpp)
-target_link_libraries(PiEar_Test_load gtest gtest_main)
-add_test(NAME test_load COMMAND PiEar_Test_load)
-
-# add_executable(PiEar_Test_http_server tests/test_http-server.cpp)
-# target_link_libraries(PiEar_Test_http_server gtest gtest_main)
-# add_test(NAME test_http_server COMMAND PiEar_Test_http_server)

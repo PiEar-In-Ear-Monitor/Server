@@ -24,7 +24,7 @@ namespace PiEar {
         /**
          * @param int pipewire_id
          * @param int piear_id
-         * @param std::string file_path
+         * @param std::string channel name
          * @param bool enabled
          */
         channel(int, int, std::string, bool);
