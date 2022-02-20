@@ -19,9 +19,11 @@
 #include "audio.h"
 #include <thread>
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
     // Click
     int cpm = 1;
     bool click_output, end_click = false;
-    std::thread click(mainloop_click, &cpm, &click_output, &end_click);
+    std::thread click(PiEar::mainloop_click, &cpm, &click_output, &end_click);
+    end_click = true;
+    click.join();
 }
