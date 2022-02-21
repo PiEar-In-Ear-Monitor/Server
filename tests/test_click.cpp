@@ -9,7 +9,7 @@
 #define SLEEP_TIME      2
 #define MARGIN_OF_ERROR 0.01
 
-void counter(int *count, const bool *click, const bool *end) {
+void counter(int *count, bool *click, bool *end) {
     while (!*end) {
         if (*click) {
             (*count)++;
@@ -28,7 +28,7 @@ int run_test(int cpm, bool *active) {
     return click_count;
 }
 
-TEST(testPiEar, testClick) {
+TEST(testPiEar, test_click) {
     int cpm = 0;
     bool active = false, end_click = false;
     std::thread click(PiEar::mainloop_click, &cpm, &active, &end_click);
