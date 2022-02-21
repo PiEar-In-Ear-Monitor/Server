@@ -6,6 +6,8 @@
 [![GitHub Issues](https://img.shields.io/github/issues/AlexOConnorHub/PiEar-Server.svg)](https://github.com/AlexOConnorHub/PiEar-Server/issues)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/AlexOConnorHub/PiEar-Server)
 [![Coverage Status](https://coveralls.io/repos/github/AlexOConnorHub/PiEar-Server/badge.svg?branch=master)](https://coveralls.io/github/AlexOConnorHub/PiEar-Server?branch=master)
+[![MIT License](https://img.shields.io/github/license/AlexOConnorHub/PiEar-Server)](https://github.com/AlexOConnorHub/PiEar-Server/blob/master/LICENSE)
+![GitHub last commit](https://img.shields.io/github/last-commit/AlexOConnorHub/PiEar-Server)
 
 # PiEar-Server
 Server for the PiEar project. This is a C++ program that provides functionality to manage and listen to multiple audio streams.
