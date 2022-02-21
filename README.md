@@ -1,4 +1,5 @@
-[![CMake](https://github.com/AlexOConnorHub/PiEar-Server/actions/workflows/cmake.yml/badge.svg?branch=master)](https://github.com/AlexOConnorHub/PiEar-Server/actions/workflows/cmake.yml)
+[![Master CMake](https://github.com/AlexOConnorHub/PiEar-Server/actions/workflows/cmake.yml/badge.svg?branch=master)](https://github.com/AlexOConnorHub/PiEar-Server/actions/workflows/cmake.yml)
+[![Develop CMake](https://github.com/AlexOConnorHub/PiEar-Server/actions/workflows/dev_cmake.yml/badge.svg?branch=master)](https://github.com/AlexOConnorHub/PiEar-Server/actions/workflows/dev_cmake.yml)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/24545/badge.svg)](https://scan.coverity.com/projects/alexoconnorhub-piear-server)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/2fb487318290447b929c9fde85f88c3f)](https://www.codacy.com/gh/AlexOConnorHub/PiEar-Server/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AlexOConnorHub/PiEar-Server&amp;utm_campaign=Badge_Grade)
 [![GitHub Releases](https://img.shields.io/github/v/release/AlexOConnorHub/PiEar-Server.svg)](https://github.com/AlexOConnorHub/PiEar-Server/releases)
