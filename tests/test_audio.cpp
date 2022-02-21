@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #include "audio.h"
 
-TEST(testPiEar, myCubeTest)
+TEST(testPiEar, audio_test)
 {
     EXPECT_EQ(1000, 1000);
 }

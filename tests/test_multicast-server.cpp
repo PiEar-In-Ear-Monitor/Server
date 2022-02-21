@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #include "multicast-server.h"
 
-TEST(testPiEar, myCubeTest)
+TEST(testPiEar, multicast_server)
 {
     EXPECT_EQ(1000, 1000);
 }
