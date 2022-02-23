@@ -18,7 +18,7 @@ if(PACKAGE_TESTS)
         gtest_discover_tests(${TEST_NAME})
     endmacro()
 
-    package_add_test(Click_Test src/click.cpp tests/test_click.cpp)
+    package_add_test(Click_Test src/globals.cpp src/click.cpp tests/test_click.cpp)
     package_add_test(Channel_Test src/channel.cpp tests/test_channel.cpp)
     package_add_test(Multicast_Test src/multicast-server.cpp tests/test_multicast-server.cpp)
     package_add_test(Audio_Test src/audio.cpp tests/test_audio.cpp)
