@@ -25,7 +25,7 @@ namespace PiEar {
      * @param click_stream  Pointer to the click's stream
      * @param end Pointer to a bool that, when set to false, will kill the server
      */
-    void mainloop_multicast_server(int *audio_streams, bool *click_stream, bool *end);
+    void mainloop_multicast_server();
 
     /**
      * Creates the Multicast server

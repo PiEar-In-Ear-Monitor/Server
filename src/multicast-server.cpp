@@ -1,20 +1,60 @@
-//******************************************************************************
-// Copyright © 2021  Alexander O'Connor
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
-// to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-// and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//******************************************************************************
-
 #include "multicast-server.h"
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <boost/asio.hpp>
+#include "boost/bind.hpp"
+#include "boost/date_time/posix_time/posix_time_types.hpp"
 
 namespace PiEar {
 
+    const int max_message_count = 10;
+
+    class sender {
+    public:
+        sender(boost::asio::io_service& io_service, const boost::asio::ip::address& multicast_address) : endpoint_(multicast_address, 6666),
+        socket_(io_service, endpoint_.protocol()), timer_(io_service), message_count_(0) {
+            std::ostringstream os;
+            os << "Message " << message_count_++;
+            message_ = os.str();
+
+            socket_.async_send_to( boost::asio::buffer(message_), endpoint_,
+        boost::bind(&sender::handle_send_to, this,boost::asio::placeholders::error));
+        }
+
+        void handle_send_to(const boost::system::error_code& error) {
+            if (!error && message_count_ < max_message_count) {
+                timer_.expires_from_now(boost::posix_time::seconds(1));
+                timer_.async_wait( boost::bind(&sender::handle_timeout, this, boost::asio::placeholders::error));
+            }
+        }
+
+        void handle_timeout(const boost::system::error_code& error) {
+            if (!error) {
+                std::ostringstream os;
+                os << "Message " << message_count_++;
+                message_ = os.str();
+                socket_.async_send_to( boost::asio::buffer(message_), endpoint_,
+                   boost::bind(&sender::handle_send_to, this, boost::asio::placeholders::error));
+            }
+        }
+
+    private:
+        boost::asio::ip::udp::endpoint endpoint_;
+        boost::asio::ip::udp::socket socket_;
+        boost::asio::deadline_timer timer_;
+        int message_count_;
+        std::string message_;
+    };
+
+    void mainloop_multicast_server() {
+        try {
+            boost::asio::io_service io_service;
+            sender s(io_service, boost::asio::ip::address::from_string("225.225.225.225"));
+            io_service.run();
+        }
+        catch (std::exception& e) {
+            std::cerr << "Exception: " << e.what() << "\n";
+        }
+    }
 }

@@ -18,5 +18,6 @@
 
 TEST(testPiEar, multicast_server)
 {
+    PiEar::mainloop_multicast_server();
     EXPECT_EQ(1000, 1000);
 }
