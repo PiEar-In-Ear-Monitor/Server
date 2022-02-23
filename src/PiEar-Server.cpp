@@ -18,12 +18,13 @@
 #include "click.h"
 #include "audio.h"
 #include <thread>
+#include <atomic>
+#include "globals.h"
 
 int main(int argc, char *argv[]) {
     // Click
-    int cpm = 1;
-    bool click_output, end_click = false;
-    std::thread click(PiEar::mainloop_click, &cpm, &click_output, &end_click);
-    end_click = true;
+    std::atomic<int> cpm = 1;
+    std::thread click(PiEar::mainloop_click, &cpm);
+    PiEar::kill_program = true;
     click.join();
 }
