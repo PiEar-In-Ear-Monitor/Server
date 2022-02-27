@@ -2,7 +2,7 @@
 // Created by alex on 2/7/22.
 //
 
-#include "channel.h"
+#include "channel.hpp"
 #include <sstream>
 #include <string>
 #include <utility>

@@ -19,12 +19,12 @@
 #include "audio.h"
 #include <thread>
 #include <atomic>
-#include "globals.h"
 
 int main(int argc, char *argv[]) {
     // Click
+    std::atomic<bool> click = false, kill_click = false;
     std::atomic<int> cpm = 1;
-    std::thread click(PiEar::mainloop_click, &cpm);
-    PiEar::kill_program = true;
-    click.join();
+    std::thread click_thread(PiEar::mainloop_click, &cpm, &click, &kill_click);
+    kill_click = true;
+    click_thread.join();
 }

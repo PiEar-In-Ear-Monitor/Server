@@ -1,5 +1,5 @@
-#include "load-data.h"
-#include "channel.h"
+#include "load-data.hpp"
+#include "channel.hpp"
 #include <utility>
 #include <vector>
 #include <fstream>
