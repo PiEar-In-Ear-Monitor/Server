@@ -24,6 +24,6 @@ if(PACKAGE_TESTS)
     package_add_test(Multicast_Test src/multicast-server.cpp tests/test_multicast-server.cpp)
     package_add_test(Audio_Test src/audio.cpp tests/test_audio.cpp)
     package_add_test(Http_Server_Test src/http-server.cpp tests/test_http-server.cpp)
-#    package_add_test(Save_Load_Data_Test tests/test_save_load_data.cpp)
+    package_add_test(Save_Load_Data_Test tests/test_save_load_data.cpp)
 endif()
 

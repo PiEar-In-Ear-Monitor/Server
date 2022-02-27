@@ -53,7 +53,7 @@ namespace PiEar {
          *              "pipewire_id": <int>,
          *              "channel": <string>,
          *              "enabled": <bool>
-     *              },
+         *          },
          *          ...
          *      ]
          * }

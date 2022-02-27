@@ -40,6 +40,9 @@ namespace PiEar {
     }
 
     std::vector<channel*> *process_array(std::string* json,  const std::string& key) {
+        if (json->empty()) {
+            return nullptr;
+        }
         nlohmann::json data = nlohmann::json::parse(*json);
         auto *channel_vector = new std::vector<channel*>();
         int i = 0;

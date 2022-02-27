@@ -6,6 +6,7 @@
 #include <thread>
 #include <random>
 #include <filesystem>
+#include <iostream>
 #include <boost/filesystem.hpp>
 
 namespace testing {
@@ -23,7 +24,7 @@ namespace testing {
     std::vector<PiEar::channel*> *load_from_file(const boost::filesystem::path& path) {
         std::string data = PiEar::get_file_contents(path.string());
         std::string key = "channels";
-        return PiEar::process_array(&data,  key);
+        return PiEar::process_array(&data, key);
     }
 
     TEST(testPiEar, task_load) {
