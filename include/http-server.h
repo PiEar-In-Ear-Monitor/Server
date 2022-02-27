@@ -23,6 +23,8 @@
 #ifndef PIEAR_SERVER_HTTP_SERVER_H
 #define PIEAR_SERVER_HTTP_SERVER_H
 
+#include <atomic>
+
 namespace PiEar {
     /**
      * @brief This runs the webserver.
@@ -32,7 +34,7 @@ namespace PiEar {
      * @param curr_hash this is the current hash of all labels, so that it is of consistent length.
      * This should be sent with the audio so the app knows if it needs to ask for the latest names.
      */
-    void mainloop_http_server(int *cpm, int audio_stream_count, char *curr_hash);
+    void mainloop_http_server(std::atomic<int> *cpm, std::atomic<int> *audio_stream_count, std::atomic<char*> *curr_hash);
 }
 
 #endif //PIEAR_SERVER_HTTP_SERVER_H

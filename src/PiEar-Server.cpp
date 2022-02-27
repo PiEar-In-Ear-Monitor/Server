@@ -18,12 +18,13 @@
 #include "click.h"
 #include "audio.h"
 #include <thread>
+#include <atomic>
 
 int main(int argc, char *argv[]) {
     // Click
-    int cpm = 1;
-    bool click_output, end_click = false;
-    std::thread click(PiEar::mainloop_click, &cpm, &click_output, &end_click);
-    end_click = true;
-    click.join();
+    std::atomic<bool> click = false, kill_click = false;
+    std::atomic<int> cpm = 1;
+    std::thread click_thread(PiEar::mainloop_click, &cpm, &click, &kill_click);
+    kill_click = true;
+    click_thread.join();
 }
