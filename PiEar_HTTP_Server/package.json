@@ -1,0 +1,17 @@
+{
+  "name": "piear_http_server",
+  "version": "1.0.0",
+  "description": "HTTP Server for PiEar",
+  "main": "index.js",
+  "scripts": {
+    "test": "test_webserver.js"
+  },
+  "keywords": [
+    "http"
+  ],
+  "author": "Alex O'Connor",
+  "license": "MIT",
+  "dependencies": {
+    "http": "^0.0.1-security"
+  }
+}
