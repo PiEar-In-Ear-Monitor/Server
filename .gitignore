@@ -35,3 +35,5 @@
 /docs/
 
 build/
+
+PiEar_HTTP_Server/node_modules/.package-lock.json

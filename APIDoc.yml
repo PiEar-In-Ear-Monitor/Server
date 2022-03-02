@@ -5,46 +5,46 @@ info:
 servers:
   - url: localhost:9090
 paths:
-  /channel-name/{id}/{name}:
+  /channel-name:
     description: Get and set a channel name
     parameters: 
-      - in: path
+      - in: query
         name: id
         schema:
           type: integer
         required: true
         description: ID of the channel to get the name of
     get:
-      description: 'Get the channel name'
+      description: Get the channel name
       responses:
         '200':
           description: OK
     put:
-      description: 'Set the channel name'
+      description: Set the channel name
       responses:
         '200':
           description: OK
       parameters: 
-        - in: path
+        - in: query
           name: name
           schema:
             type: string
           required: true
           description: new name of the channel
-  /bpm/{bpm}:
+  /bpm:
     description: Get and set the bpm
     get:
-      description: 'Get the current BPM'
+      description: Get the current BPM
       responses:
         '200':
           description: OK
     put:
-      description: 'Set the current BPM'
+      description: Set the current BPM
       responses:
         '200':
           description: OK
       parameters: 
-        - in: path
+        - in: query
           name: bpm
           schema:
             type: integer
