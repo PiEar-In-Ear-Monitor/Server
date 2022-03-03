@@ -6,64 +6,37 @@ var WebSocketServer = require('websocket').server;
 //#endregion imports
 
 //#region handle arguments and globals
-if (process.argv.length != 6) {
-    console.warn(`Error: expected four arguments, found ${process.argv.length - 2}\nUsage: node index.js [Kill-Server-Endpoint] [Websocket-Endpoint] [Path-To-Channel-Info] [BPM]`);
+if (process.argv.length != 4) {
+    console.warn(`Error: expected four arguments, found ${process.argv.length - 2}\nUsage: node index.js [Kill-Server-Secret] [Websocket-Shared-Secret]`);
     process.exit(1);
 }
 
+let is_initialized = false;
 const server = http.createServer(requestListener);
 server.listen(9090);
-const kill_endpoint = process.argv[2];
-const websocket_endpoint = process.argv[3];
-let channel_count = 0;
-let channel_names = parse_channel_file(process.argv[4]);
-let bpm = parseInt(process.argv[5]);
-console.log(`Server port: ${server.address().port}`);
-console.log(`Kill Endpoint: ${kill_endpoint}`);
-console.log(`Websocket Enpoint: ${websocket_endpoint}`);
-console.log(`Number of Channels: ${channel_names.channels.length}`);
-console.log(`Current BPM: ${bpm}`);
+const kill_secret = process.argv[2];
+const websocket_shared_secret = process.argv[3];
+let channel_names = { "Channels" : [] };
+let connection = null;
 
-function parse_channel_file(path_to_json_file) {
-    return {
-        "channels":
-            [
-                {
-                    "pipewire_id":0,
-                    "piear_id":0,
-                    "channel_name":"Channel 0",
-                    "enabled":false
-                },
-                {
-                    "pipewire_id": 1,
-                    "piear_id":2,
-                    "channel_name":"Channel 1",
-                    "enabled":true
-                },
-                {
-                    "pipewire_id":2,
-                    "piear_id":4,
-                    "channel_name":"Channel 2",
-                    "enabled":true
-                }
-            ]
-    }
-}
+console.log(`Server port: ${server.address().port}`);
+console.log(`Kill Endpoint: ${kill_secret}`);
+console.log(`Websocket Enpoint: ${websocket_shared_secret}`);
 //#endregion
 
 //#region endpoint handlers
 function handleBPMPut(urlParsed, res) {
     //#region Data validation
-    if (urlParsed.query.new_bpm == null || !/[0-9]*/.test(urlParsed.query.new_bpm)) {
+    if (urlParsed.query.bpm == null || !/[0-9]*/.test(urlParsed.query.bpm)) {
         res.writeHead(422, { 'WebServer': 'PiEar-HTTP-Server' });
-        res.end(JSON.stringify({"error": "expected query 'new_bpm' to be a number"}));
-        console.warn(`Received new_bpm of ${urlParsed.query.new_bpm}`);
+        res.end(JSON.stringify({"error": "expected query 'bpm' to be a number"}));
+        console.warn(`Received bpm of ${urlParsed.query.bpm}`);
         return;
     }
-    let new_bpm = parseInt(urlParsed.query.new_bpm);
+    let new_bpm = parseInt(urlParsed.query.bpm);
     if (new_bpm < 0 || new_bpm > 255) {
         res.writeHead(422, { 'WebServer': 'PiEar-HTTP-Server' });
-        res.end(JSON.stringify({"error": "'new_bpm' expected to be betwen 0 and 255 (inclusive)"}));
+        res.end(JSON.stringify({"error": "'bpm' expected to be betwen 0 and 255 (inclusive)"}));
         return;
     }
     //#endregion
@@ -92,7 +65,7 @@ function handleChannelNameGet(urlParsed, res) {
         return;
     }
     let found_channel = false;
-    channel_names.channels.forEach(channel => {
+    channel_names.Channels.forEach(channel => {
         if (channel.piear_id == id) {
             res.writeHead(200, { 'WebServer': 'PiEar-HTTP-Server' });
             res.end(JSON.stringify({'channel_name': channel.channel_name}));
@@ -114,15 +87,15 @@ function handleChannelNamePut(urlParsed, res) {
         return;
     }
     let new_name;
-    if (urlParsed.query.new_name != null && /[0-9]*/.test(urlParsed.query.new_name)) {
-        new_name = urlParsed.query.new_name.slice(0, 26);
+    if (urlParsed.query.name != null && /[0-9]*/.test(urlParsed.query.name)) {
+        new_name = urlParsed.query.name.slice(0, 26);
     } else {
         res.writeHead(422, { 'WebServer': 'PiEar-HTTP-Server' });
-        res.end(JSON.stringify({"error": "expected a query, 'new_name', to consist of only numbers and letters."}));
+        res.end(JSON.stringify({"error": "expected a query, 'name', to consist of only numbers and letters."}));
         return;
     }
     let found_channel = false;
-    channel_names.channels.forEach(channel => {
+    channel_names.Channels.forEach(channel => {
         if (channel.piear_id == id) {
             channel.channel_name = new_name;
             res.writeHead(200, { 'WebServer': 'PiEar-HTTP-Server' });
@@ -138,8 +111,76 @@ function handleChannelNamePut(urlParsed, res) {
 }
 //#endregion
 
+//#region Websocket
+let wsServer = new WebSocketServer({
+    httpServer: server,
+    autoAcceptConnections: false,
+    dropConnectionOnKeepaliveTimeout: false,
+    parseCookies: false
+});
+
+function originIsAllowed(headers) {
+    let userAgent = "";
+    let SharedSecretSubmitted = "";
+    headers.forEach((element, index, array) => {
+        if (element == "User-Agent") {
+            userAgent = array[index + 1];
+        } else if (element == "Shared-Secret") {
+            SharedSecretSubmitted = array[index + 1];
+        }
+    });
+    return ((userAgent.search("PiEar-Server") != -1) && (SharedSecretSubmitted == websocket_shared_secret));
+}
+
+wsServer.on( 'request', function(request) {
+    if (!originIsAllowed(request.httpRequest.rawHeaders)) {
+        // Make sure we only accept requests from an allowed origin
+        request.reject();
+        return;
+    }
+
+    connection = request.accept(null, request.origin);
+    
+    connection.on('message', function(message) {
+        if (!is_initialized) {
+            let json = JSON.parse(message.utf8Data.replace('\u0000', ''));
+            if (json.BPM != null) {
+                bpm = json.BPM;
+                is_initialized = true;
+            } else {
+                let new_channel_name = json.channel_name;
+                let new_channel_id = json.piear_id;
+                channel_names.Channels.push({"piear_id": new_channel_id,"channel_name":new_channel_name});
+                connection.sendUTF("Adding " + new_channel_name);
+                console.log("Adding " + new_channel_name);
+            }
+        } else {
+            if (message.utf8Data === 'kill_secret') {
+                server.close();
+                wsServer.shutDown();
+            } else {
+                console.log('Received Message: ' + message.utf8Data);
+                connection.sendUTF(message.utf8Data);
+            }
+        }
+    });
+    
+    connection.on('close', function(reasonCode, description) {
+        console.log("Websocket closed");
+    });
+});
+//#endregion
+
 //#region server setup
 function requestListener (req, res) {
+    if (connection != null) {
+        connection.sendUTF("Request: " + req.url);
+    }
+    if (!is_initialized) {
+        res.writeHead(200);
+        res.end(JSON.stringify({"error": "Server not initialized"}));
+        return;
+    }
     const urlParsed = url.parse(req.url, true);
     switch (urlParsed.pathname) {
     case "/bpm":
@@ -148,54 +189,10 @@ function requestListener (req, res) {
     case "/channel-name":
         (req.method == "PUT")?handleChannelNamePut(urlParsed, res):handleChannelNameGet(urlParsed, res);
         break;
-    case "/kill-server":
-        res.end(JSON.stringify({"kill-command": true}));
-        server.close();
-        break;
     default:
         res.writeHead(404, { 'WebServer': 'PiEar-HTTP-Server'});
         res.end(JSON.stringify({"error": `'${urlParsed.path}' not found`}));
         break;
     }
 };
-//#endregion
-
-//#region Websocket
-let wsServer = new WebSocketServer({
-    httpServer: server,
-    autoAcceptConnections: false,
-    dropConnectionOnKeepaliveTimeout: false,
-});
-
-function originIsAllowed(origin) {
-    console.log(origin);
-    return true;
-}
-
-wsServer.on( 'request', function(request) {
-    if (!originIsAllowed(request.origin)) {
-        // Make sure we only accept requests from an allowed origin
-        request.reject();
-        console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
-        return;
-    }
-
-    var connection = request.accept('echo-protocol', request.origin);
-    console.log((new Date()) + ' Connection accepted.');
-    
-    connection.on('message', function(message) {
-        if (message.type === 'utf8') {
-            console.log('Received Message: ' + message.utf8Data);
-            connection.sendUTF(message.utf8Data);
-        }
-        else if (message.type === 'binary') {
-            console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-            connection.sendBytes(message.binaryData);
-        }
-    });
-    
-    connection.on('close', function(reasonCode, description) {
-        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-    });
-});
 //#endregion

@@ -2,9 +2,9 @@
   "name": "piear_http_server",
   "version": "1.0.0",
   "description": "HTTP Server for PiEar",
-  "main": "index.js",
+  "main": "./index.js",
   "scripts": {
-    "test": "test_webserver.js"
+    "test": "./test_webserver.js"
   },
   "keywords": [
     "http"
