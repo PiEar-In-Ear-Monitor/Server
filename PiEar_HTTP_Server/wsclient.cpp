@@ -7,46 +7,31 @@
 #include <string>
 #include <sys/poll.h>
 
-namespace beast = boost::beast;         // from <boost/beast.hpp>
-namespace http = beast::http;           // from <boost/beast/http.hpp>
-namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
-namespace net = boost::asio;            // from <boost/asio.hpp>
-using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
-
 // Sends a WebSocket message and prints the response
-int main(int argc, char** argv)
-{
+int main() {
     try
     {
         // Check command line arguments.
-        if(argc != 3)
-        {
-            std::cerr <<
-                "Usage: websocket-client-sync <host> <port>\n" <<
-                "Example:\n" <<
-                "    websocket-client-sync echo.websocket.org 80\n";
-            return EXIT_FAILURE;
-        }
-        std::string host = argv[1];
-        auto const  port = argv[2];
+        std::string host = "localhost";
+        auto const  port = "9090";
 
         // The io_context is required for all I/O
-        net::io_context ioc;
+        boost::asio::io_context ioc;
 
         // These objects perform our I/O
-        tcp::resolver resolver{ioc};
-        websocket::stream<tcp::socket> ws{ioc};
+        boost::asio::ip::tcp::resolver resolver{ioc};
+        boost::beast::websocket::stream<boost::asio::ip::tcp::socket> ws{ioc};
 
         // Update the host_ string. This will provide the value of the
         // Host HTTP header during the WebSocket handshake.
         // See https://tools.ietf.org/html/rfc7230#section-5.4
-        host += ':' + std::to_string(net::connect(ws.next_layer(), resolver.resolve(host, port)).port());
+        host += ':' + std::to_string(boost::asio::connect(ws.next_layer(), resolver.resolve(host, port)).port());
 
         // Set a decorator to change the User-Agent of the handshake
-        ws.set_option(websocket::stream_base::decorator(
-            [](websocket::request_type& req)
+        ws.set_option(boost::beast::websocket::stream_base::decorator(
+            [](boost::beast::websocket::request_type& req)
             {
-                req.set(http::field::user_agent, "PiEar-Server-1.0");
+                req.set(boost::beast::http::field::user_agent, "PiEar-Server-1.0");
                 req.set("Shared-Secret", "Hello-World");
             }));
 
@@ -54,32 +39,32 @@ int main(int argc, char** argv)
         ws.handshake(host, "/"); // TODO Consider making custom URL
 
         // This buffer will hold the incoming message
-        beast::flat_buffer buffer;
+        boost::beast::flat_buffer buffer;
         
         // Send the message
-        ws.write(net::buffer("{\"piear_id\":0,\"channel_name\":\"Bass\"}"));
-        ws.write(net::buffer("{\"piear_id\":1,\"channel_name\":\"Cajon\"}"));
-        ws.write(net::buffer("{\"piear_id\":2,\"channel_name\":\"Desther\"}"));
-        ws.write(net::buffer("{\"piear_id\":3,\"channel_name\":\"Keys\"}"));
-        ws.write(net::buffer("{\"piear_id\":4,\"channel_name\":\"Guitar\"}"));
-        ws.write(net::buffer("{\"BPM\":150}"));
+        ws.write(boost::asio::buffer("{\"piear_id\":0,\"channel_name\":\"Bass\"}"));
+        ws.write(boost::asio::buffer("{\"piear_id\":1,\"channel_name\":\"Cajon\"}"));
+        ws.write(boost::asio::buffer("{\"piear_id\":2,\"channel_name\":\"Desther\"}"));
+        ws.write(boost::asio::buffer("{\"piear_id\":3,\"channel_name\":\"Keys\"}"));
+        ws.write(boost::asio::buffer("{\"piear_id\":4,\"channel_name\":\"Guitar\"}"));
+        ws.write(boost::asio::buffer("{\"BPM\":150}"));
 
         struct pollfd fds;
         fds.fd = 0; /* this is STDIN */
         fds.events = POLLIN;
         while (!poll(&fds, 1, 0)) {
             ws.read(buffer);
-            std::cout << "Received " << beast::make_printable(buffer.data()) << std::endl;
+            std::cout << "Received " << boost::beast::make_printable(buffer.data()) << std::endl;
             buffer.clear();
         }
-        ws.write(net::buffer("kill"));
+        ws.write(boost::asio::buffer("kill"));
         // Close the WebSocket connection
-        ws.close(websocket::close_code::normal);
+        ws.close(boost::beast::websocket::close_code::normal);
 
         // If we get here then the connection is closed gracefully
 
         // The make_printable() function helps print a ConstBufferSequence
-        std::cout << beast::make_printable(buffer.data()) << std::endl;
+        std::cout << boost::beast::make_printable(buffer.data()) << std::endl;
     }
     catch(std::exception const& e)
     {

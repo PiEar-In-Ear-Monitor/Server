@@ -2,7 +2,9 @@
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "clockify.tracking.workspaceId": "61fff3fe88a7674a8fd9dde3",
     "files.associations": {
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "*.ipp": "cpp",
+        "iostream": "cpp"
     },
     "yaml.schemas": {
         "https://json.schemastore.org/github-workflow.json": "file:///home/alex/Documents/Uni-Private/2022/Winter/CPTR-488/Server/.github/workflows/cmake.yml"

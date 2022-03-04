@@ -41,6 +41,7 @@ function handleBPMPut(urlParsed, res) {
     }
     //#endregion
     bpm = new_bpm;
+    connection.sendUTF(JSON.stringify({"bpm": new_bpm}));
     res.writeHead(200, { 'WebServer': 'PiEar-HTTP-Server' });
     res.end(JSON.stringify({"bpm": bpm}));
 }
@@ -98,6 +99,7 @@ function handleChannelNamePut(urlParsed, res) {
     channel_names.Channels.forEach(channel => {
         if (channel.piear_id == id) {
             channel.channel_name = new_name;
+            connection.sendUTF(JSON.stringify({"piear_id": id, "channel_name": new_name}));
             res.writeHead(200, { 'WebServer': 'PiEar-HTTP-Server' });
             res.end(JSON.stringify({'channel_name': channel.channel_name}));
             found_channel = true;
@@ -151,9 +153,8 @@ wsServer.on( 'request', function(request) {
                 let new_channel_name = json.channel_name;
                 let new_channel_id = json.piear_id;
                 channel_names.Channels.push({"piear_id": new_channel_id,"channel_name":new_channel_name});
-                connection.sendUTF("Adding " + new_channel_name);
-                console.log("Adding " + new_channel_name);
             }
+            connection.sendUTF(JSON.stringify({"status": "OK"}));
         } else {
             if (message.utf8Data === 'kill_secret') {
                 server.close();
@@ -173,9 +174,6 @@ wsServer.on( 'request', function(request) {
 
 //#region server setup
 function requestListener (req, res) {
-    if (connection != null) {
-        connection.sendUTF("Request: " + req.url);
-    }
     if (!is_initialized) {
         res.writeHead(200);
         res.end(JSON.stringify({"error": "Server not initialized"}));
