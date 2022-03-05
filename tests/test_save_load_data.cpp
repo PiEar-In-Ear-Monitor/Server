@@ -1,15 +1,13 @@
-// Has to be before including task.hpp
-#define SAVE_TIME_INTERVAL_SECONDS 1
-
 #include "gtest/gtest.h"
-#include "load-data.h"
-#include "channel.h"
+#include "load-data.hpp"
+#include "task.hpp"
+#include "channel.hpp"
 #include <vector>
 #include <thread>
 #include <random>
 #include <filesystem>
+#include <iostream>
 #include <boost/filesystem.hpp>
-#include "task.hpp"
 
 namespace testing {
     int channel_count = 0;
@@ -26,19 +24,19 @@ namespace testing {
     std::vector<PiEar::channel*> *load_from_file(const boost::filesystem::path& path) {
         std::string data = PiEar::get_file_contents(path.string());
         std::string key = "channels";
-        return PiEar::process_array(&data,  key);
+        return PiEar::process_array(&data, key);
     }
 
     TEST(testPiEar, task_load) {
         auto cha = new std::vector<PiEar::channel*>;
         add_channel(3, cha);
-        bool *kill_test_task = new bool(false);
         boost::filesystem::path full_path = boost::filesystem::path(std::filesystem::temp_directory_path()) / "piear_test_save_load.json";
-        std::thread test_thread (PiEar::task, cha, full_path.string(), kill_test_task);
+        auto task = PiEar::task(cha, full_path.string(), 1);
+        task.async_run_save_task();
         sleep(2);
         auto data = load_from_file(full_path);
         ASSERT_EQ(cha->size(), data->size());
-        int initial_count = cha->size();
+        auto initial_count = cha->size();
         for (unsigned i = 0; i < cha->size(); i++) {
             ASSERT_EQ(cha->at(i)->pipewire_id, data->at(i)->pipewire_id);
             ASSERT_EQ(cha->at(i)->piear_id, data->at(i)->piear_id);
@@ -56,8 +54,7 @@ namespace testing {
             ASSERT_EQ(cha->at(i)->channel_name, data->at(i)->channel_name);
             ASSERT_EQ(cha->at(i)->enabled, data->at(i)->enabled);
         }
-        *kill_test_task = true;
-        test_thread.join();
-        remove(full_path);
+        task.async_stop_save_task();
+        remove(full_path.c_str());
     }
 }
