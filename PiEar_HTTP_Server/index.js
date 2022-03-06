@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 //#region imports
 const http = require('http');
+const { kill } = require('process');
 const url = require('url');
 var WebSocketServer = require('websocket').server;
 //#endregion imports
@@ -154,14 +155,12 @@ wsServer.on( 'request', function(request) {
                 let new_channel_id = json.piear_id;
                 channel_names.Channels.push({"piear_id": new_channel_id,"channel_name":new_channel_name});
             }
-            connection.sendUTF(JSON.stringify({"status": "OK"}));
         } else {
-            if (message.utf8Data === 'kill_secret') {
+            if (message.utf8Data == kill_secret) {
                 server.close();
                 wsServer.shutDown();
             } else {
                 console.log('Received Message: ' + message.utf8Data);
-                connection.sendUTF(message.utf8Data);
             }
         }
     });

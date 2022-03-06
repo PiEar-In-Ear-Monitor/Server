@@ -1,81 +1,88 @@
-//#include "http-server.h"
-#include <string>
+#include "http-server.h"
+#include "channel.hpp"
+#include <vector>
 #include <atomic>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <cstdlib>
 #include <iostream>
 #include <string>
-#include <sys/poll.h>
+#include <nlohmann/json.hpp>
 
 namespace PiEar {
-    void mainloop_http_server(std::atomic<int> *cpm, int audio_stream_count, const std::string& curr_hash) {
-        try
-        {
-            // Check command line arguments.
-            std::string host = "localhost";
-            auto const  port = "9090";
+    void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm) {
+        // Start server thread
+        int server_thread = fork();
+        if (!server_thread) {
+            char * const command[] = {"index.js", "kill", "Hello-World", nullptr}; // TODO Randomize Endpoints
+            execve("/home/alex/Documents/Uni-Private/2022/Winter/CPTR-488/Server/PiEar_HTTP_Server/index.js", command, nullptr);
+            return; // Redundant
+        }
+        sleep(1);
+        std::string host = "localhost";
+        std::string port = "9090";
+        boost::asio::io_context ioc;
+        boost::asio::ip::tcp::resolver resolver{ioc};
+        boost::beast::websocket::stream<boost::asio::ip::tcp::socket> ws{ioc};
+        // Connect to server thread
+        host += ':' + std::to_string(boost::asio::connect(ws.next_layer(), resolver.resolve(host, port)).port());
 
-            // The io_context is required for all I/O
-            boost::asio::io_context ioc;
-
-            // These objects perform our I/O
-            boost::asio::ip::tcp::resolver resolver{ioc};
-            boost::beast::websocket::stream<boost::asio::ip::tcp::socket> ws{ioc};
-
-            // Update the host_ string. This will provide the value of the
-            // Host HTTP header during the WebSocket handshake.
-            // See https://tools.ietf.org/html/rfc7230#section-5.4
-            host += ':' + std::to_string(boost::asio::connect(ws.next_layer(), resolver.resolve(host, port)).port());
+        try {
 
             // Set a decorator to change the User-Agent of the handshake
             ws.set_option(boost::beast::websocket::stream_base::decorator(
-                    [](boost::beast::websocket::request_type& req)
-                    {
+                [](boost::beast::websocket::request_type &req) {
                         req.set(boost::beast::http::field::user_agent, "PiEar-Server-1.0");
                         req.set("Shared-Secret", "Hello-World");
-                    }));
+                    }
+                ));
 
-            // Perform the websocket handshake
-            ws.handshake(host, "/"); // TODO Consider making custom URL
+            ws.handshake(host, "/");
 
-            // This buffer will hold the incoming message
-            boost::beast::flat_buffer buffer;
-
-            // Send the message
-            ws.write(boost::asio::buffer(R"({"piear_id":0,"channel_name":"Bass"})"));
-            ws.write(boost::asio::buffer(R"({"piear_id":1,"channel_name":"Cajon"})"));
-            ws.write(boost::asio::buffer(R"({"piear_id":2,"channel_name":"Desther"})"));
-            ws.write(boost::asio::buffer(R"({"piear_id":3,"channel_name":"Keys"})"));
-            ws.write(boost::asio::buffer(R"({"piear_id":4,"channel_name":"Guitar"})"));
-            ws.write(boost::asio::buffer(R"({"BPM":150})"));
-
-            struct pollfd fds{};
-            fds.fd = 0; /* this is STDIN */
-            fds.events = POLLIN;
-            while (!poll(&fds, 1, 0)) {
-                ws.read(buffer);
-                std::cout << "Received " << boost::beast::make_printable(buffer.data()) << std::endl;
-                buffer.clear();
+            for (auto &chan : *channels) {
+                ws.write(boost::asio::buffer(std::string(*chan)));
             }
-            ws.write(boost::asio::buffer("kill"));
+            std::stringstream bpm_string;
+            bpm_string << "{\"BPM\":" << *bpm << "}";
+            ws.write(boost::asio::buffer(bpm_string.str()));
+            int kill_thread = fork();
+            if (!kill_thread) {
+                boost::beast::flat_buffer stream_buffer;
+                while (true) {
+                    ws.read(stream_buffer);
+                    std::cout << "Received " << boost::beast::make_printable(stream_buffer.data()) << std::endl;
+                    std::ostringstream os;
+                    os << boost::beast::make_printable(stream_buffer.data());
+                    std::string input_string = os.str();
+                    nlohmann::json json_parsed = nlohmann::json::parse(input_string);
+                    stream_buffer.clear();
+                    if ((json_parsed)["piear_id"].empty()) {
+                        if (!(json_parsed)["bpm"].empty()) {
+                            *bpm =  (json_parsed)["bpm"];
+                        }
+                    } else {
+                        if ((json_parsed)["piear_id"].empty()) {
+                            continue;
+                        }
+                        for (auto & chan : *channels) {
+                            if (chan->piear_id == (json_parsed)["piear_id"]) {
+                                if (!(json_parsed)["channel_name"].empty()) {
+                                    chan->channel_name = (json_parsed)["channel_name"];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            do pthread_yield(); while (!*(kill_switch));
+
+            kill(server_thread, SIGTERM);
+            kill(kill_thread, SIGTERM);
+
             // Close the WebSocket connection
-            ws.close(boost::beast::websocket::close_code::normal);
-
-            // If we get here then the connection is closed gracefully
-
-            // The make_printable() function helps print a ConstBufferSequence
-            std::cout << boost::beast::make_printable(buffer.data()) << std::endl;
-        }
-        catch(std::exception const& e)
-        {
+        } catch(std::exception const& e) {
             std::cerr << "Error: " << e.what() << std::endl;
         }
     }
-}
-
-int main() {
-    PiEar::mainloop_http_server(new std::atomic<int>(100), 4, "Hello-World");
 }

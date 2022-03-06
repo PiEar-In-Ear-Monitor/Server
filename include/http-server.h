@@ -8,19 +8,23 @@
 #ifndef PIEAR_SERVER_HTTP_SERVER_H
 #define PIEAR_SERVER_HTTP_SERVER_H
 
+#include "channel.hpp"
 #include <string>
 #include <atomic>
+#include <thread>
+#include <vector>
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/ip/tcp.hpp>
 
 namespace PiEar {
     /**
      * @brief This runs the webserver.
-     * @details On port 8080, this webserver is a getter/setter for the labels and cpm
-     * @param cpm pointer to the cpm
-     * @param audio_stream_count the number of audio streams
-     * @param curr_hash this is the current hash of all labels, so that it is of consistent length.
-     * This should be sent with the audio so the app knows if it needs to ask for the latest names.
+     * @details On port 9090, this webserver is a getter/setter for the labels and cpm
+     * @param std::atomic<bool> This is the kill swtitch for the http server
      */
-    void mainloop_http_server(std::atomic<int> *cpm, int audio_stream_count, const std::string& curr_hash);
+    void mainloop_http_server(std::atomic<bool>*, std::vector<channel*>*, std::atomic<int>*);
 }
 
 #endif //PIEAR_SERVER_HTTP_SERVER_H

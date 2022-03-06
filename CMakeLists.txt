@@ -21,7 +21,7 @@ if(PACKAGE_TESTS)
     package_add_test(Click_Test src/click.cpp tests/test_click.cpp)
     target_link_libraries(Click_Test gtest gtest_main pthread)
 
-    package_add_test(Channel_Test src/channel.cpp tests/test_channel.cpp)
+    package_add_test(Channel_Test tests/test_channel.cpp)
     target_link_libraries(Channel_Test gtest gtest_main)
 
     package_add_test(Multicast_Test src/multicast-server.cpp tests/test_multicast-server.cpp)
@@ -30,11 +30,10 @@ if(PACKAGE_TESTS)
     package_add_test(Audio_Test src/audio.cpp tests/test_audio.cpp)
     target_link_libraries(Audio_Test gtest gtest_main pthread)
 
-#    package_add_test(Http_Server_Test src/http-server.cpp tests/test_http-server.cpp)
-#    find_package(Drogon CONFIG REQUIRED)
-#    target_link_libraries(Http_Server_Test PRIVATE Drogon::Drogon)
+    package_add_test(Http_Server_Test src/http-server.cpp tests/test_http-server.cpp)
+    target_link_libraries(Http_Server_Test PUBLIC gtest gtest_main pthread boost_system)
 
-    package_add_test(Save_Load_Data_Test src/channel.cpp src/load-data.cpp tests/test_save_load_data.cpp)
+    package_add_test(Save_Load_Data_Test tests/test_save_load_data.cpp)
     target_link_libraries(Save_Load_Data_Test PUBLIC gtest gtest_main pthread boost_filesystem boost_system)
 endif()
 
