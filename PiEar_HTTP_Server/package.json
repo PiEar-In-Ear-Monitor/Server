@@ -2,7 +2,7 @@
   "name": "piear_http_server",
   "version": "1.0.0",
   "description": "HTTP Server for PiEar",
-  "main": "./index.js",
+  "main": "./server.js",
   "scripts": {
     "test": "./test_webserver.js"
   },
@@ -14,5 +14,9 @@
   "dependencies": {
     "url": "^0.11.0",
     "websocket": "^1.0.34"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1",
+    "mocha": "^9.2.1"
   }
 }

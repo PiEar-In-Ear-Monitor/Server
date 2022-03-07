@@ -25,6 +25,8 @@ namespace PiEar {
      * @param std::atomic<bool> This is the kill swtitch for the http server
      */
     void mainloop_http_server(std::atomic<bool>*, std::vector<channel*>*, std::atomic<int>*);
+
+    void kill_server_waiter(int, std::atomic<bool>*);
 }
 
 #endif //PIEAR_SERVER_HTTP_SERVER_H
