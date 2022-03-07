@@ -1,3 +1,3 @@
-const main = require("./index");
-
+#!/usr/bin/env node
+const { main } = require("./main");
 main();

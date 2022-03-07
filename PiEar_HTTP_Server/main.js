@@ -9,7 +9,7 @@ function main() {
 
     //#region handle arguments and globals
     if (process.argv.length != 4) {
-        console.warn(`Error: expected four arguments, found ${process.argv.length - 2}\nUsage: node index.js [Kill-Server-Secret] [Websocket-Shared-Secret]`);
+        console.warn(`Error: expected two arguments, found ${process.argv.length - 2}\nUsage: node index.js [Kill-Server-Secret] [Websocket-Shared-Secret]`);
         process.exit(1);
     }
 
@@ -148,6 +148,7 @@ function main() {
         connection.on('message', function(message) {
             if (!is_initialized) {
                 let json = JSON.parse(message.utf8Data.replace('\u0000', ''));
+                console.log(json);
                 if (json.BPM != null) {
                     bpm = json.BPM;
                     is_initialized = true;

@@ -4,7 +4,7 @@
   "description": "HTTP Server for PiEar",
   "main": "./server.js",
   "scripts": {
-    "test": "./test_webserver.js"
+    "test": "./tests/test_webserver.js"
   },
   "keywords": [
     "http"
