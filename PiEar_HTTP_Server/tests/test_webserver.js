@@ -1,15 +1,10 @@
 #!/usr/bin/env node
 var WebSocketClient = require('websocket').client;
-const http = require('http')
 const {before_ws_tests} = require("./before_websocket_tests");
 const {bpm_tests} = require("./bpm_tests");
 const {channel_name_tests} = require("./channel_name_tests");
-var childProcess = require('child_process');
-
-let server_process = childProcess.spawn("../server.js kill-test-secret header-test-secret");
 
 console.log("Running tests");
-
 before_ws_tests("http://localhost:9090");
 
 let client = new WebSocketClient();
@@ -44,5 +39,6 @@ client.on('connect', function(con) {
 });
 
 client.connect('ws://localhost:9090/', null, null, {"User-Agent":"PiEar-Server", "Shared-Secret":"header-test-secret"});
+
 
 console.log("Done testing");

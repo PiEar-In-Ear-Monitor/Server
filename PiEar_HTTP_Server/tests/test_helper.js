@@ -1,12 +1,16 @@
 const http = require('http');
 const axios = require('axios');
-async function make_request(endpoint, expected) {
+const exp = require('constants');
+async function make_request(endpoint, expected, keys) {
     try {
         const resp = await axios.get(endpoint);
         let data = JSON.parse(resp.data);
-        if (data != expected){
-            console.error(`expected ${expected}, got ${data}`);
-        }
+        console.log(data);
+        keys.forEach(key => {
+            if (data[key] != expected[key]) {
+                console.error(`expected ${key} to be ${expected[key]}, got ${data[key]}`);
+            }
+        });
     } catch (error) {
     }
 }

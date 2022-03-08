@@ -175,12 +175,17 @@ function main() {
 
     //#region server setup
     function requestListener (req, res) {
+        const urlParsed = url.parse(req.url, true);
+        if (urlParsed.pathname == "/abcdefghijklmnopqrstuvwxyz") {
+            res.writeHead(200, { 'WebServer': 'PiEar-HTTP-Server'});
+            res.end("zyxwvutsrqponmlkjihgfedcba");
+            return;
+        }
         if (!is_initialized) {
             res.writeHead(200);
             res.end(JSON.stringify({"error": "Server not initialized"}));
             return;
         }
-        const urlParsed = url.parse(req.url, true);
         switch (urlParsed.pathname) {
         case "/bpm":
             (req.method == "PUT")?handleBPMPut(urlParsed, res):handleBPMGet(res);
@@ -196,4 +201,7 @@ function main() {
     };
     //#endregion
 }
+
+main();
+
 module.exports = { main };

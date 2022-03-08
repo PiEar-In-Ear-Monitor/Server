@@ -3,7 +3,7 @@ info:
   title: PiEar REST API
   version: '1.0'
 servers:
-  - url: localhost:9090
+  - url: http://localhost:9090
 paths:
   /channel-name:
     description: Get and set a channel name
@@ -50,3 +50,10 @@ paths:
             type: integer
           required: true
           description: new bpm
+  /abcdefghijklmnopqrstuvwxyz:
+    description: Endpoint to locate server
+    get:
+      description: Returns alphabet backwards
+      responses:
+        '200':
+          description: zyxwvutsrqponmlkjihgfedcba
