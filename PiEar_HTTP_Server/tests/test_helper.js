@@ -1,27 +1,22 @@
 const http = require('http');
 const axios = require('axios');
-function make_request(endpoint, expected) {
-    http.get(endpoint, (resp) => {
-        let data = '';
-        resp.on("data", (chunk) => {
-            data += chunk;
-        })
-
-        resp.on('end', () => {
-            if (data != expected){
-                console.error(`expected ${expected}, got ${data}`);
-            }
-        })
-    }).on("error", (err) => {
-        console.log("Error: " + err.message);
-    });
+async function make_request(endpoint, expected) {
+    try {
+        const resp = await axios.get(endpoint);
+        let data = JSON.parse(resp.data);
+        if (data != expected){
+            console.error(`expected ${expected}, got ${data}`);
+        }
+    } catch (error) {
+    }
 }
 
-function make_change(endpoint) {
-    axios.put('endpoint', null).then((res) => {
-    }).catch((err) => {
-        // console.error(err);
-    });
+async function make_change(endpoint) {
+    try {
+        const resp = await axios.put(endpoint, null);
+    } catch (error) {
+
+    }
 }
 
 module.exports = { make_request, make_change };

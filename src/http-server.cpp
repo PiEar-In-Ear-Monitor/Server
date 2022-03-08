@@ -15,8 +15,8 @@ namespace PiEar {
         // Start server thread
         int server_thread = fork();
         if (!server_thread) {
-            char * const command[] = {"index.js", "kill", "Hello-World", nullptr}; // TODO Randomize Endpoints
-            execve("/home/alex/Documents/Uni-Private/2022/Winter/CPTR-488/Server/PiEar_HTTP_Server/index.js", command, nullptr);
+            char * const command[] = {"server.js", "kill", "Hello-World", nullptr}; // TODO Randomize Endpoints
+            execve("/home/alex/Documents/Uni-Private/2022/Winter/CPTR-488/Server/PiEar_HTTP_Server/server.js", command, nullptr);
             return; // Redundant
         }
         sleep(1);
@@ -52,28 +52,29 @@ namespace PiEar {
             try {
                 ws.read(stream_buffer);
             } catch(std::exception const& e) {}
-            std::cout << "Received " << boost::beast::make_printable(stream_buffer.data()) << std::endl;
-            std::ostringstream os;
-            os << boost::beast::make_printable(stream_buffer.data());
-            std::string input_string = os.str();
-            nlohmann::json json_parsed = nlohmann::json::parse(input_string);
-            stream_buffer.clear();
-            if ((json_parsed)["piear_id"].empty()) {
-                if (!(json_parsed)["bpm"].empty()) {
-                    *bpm =  (json_parsed)["bpm"];
-                }
-            } else {
+            try {
+                std::ostringstream os;
+                os << boost::beast::make_printable(stream_buffer.data());
+                std::string input_string = os.str();
+                nlohmann::json json_parsed = nlohmann::json::parse(input_string);
+                stream_buffer.clear();
                 if ((json_parsed)["piear_id"].empty()) {
-                    continue;
-                }
-                for (auto & chan : *channels) {
-                    if (chan->piear_id == (json_parsed)["piear_id"]) {
-                        if (!(json_parsed)["channel_name"].empty()) {
-                            chan->channel_name = (json_parsed)["channel_name"];
+                    if (!(json_parsed)["bpm"].empty()) {
+                        *bpm =  (json_parsed)["bpm"];
+                    }
+                } else {
+                    if ((json_parsed)["piear_id"].empty()) {
+                        continue;
+                    }
+                    for (auto & chan : *channels) {
+                        if (chan->piear_id == (json_parsed)["piear_id"]) {
+                            if (!(json_parsed)["channel_name"].empty()) {
+                                chan->channel_name = (json_parsed)["channel_name"];
+                            }
                         }
                     }
                 }
-            }
+            } catch (std::exception const &e) {}
         }
         kill_server_thread.join();
     }

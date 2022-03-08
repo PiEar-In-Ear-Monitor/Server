@@ -12,7 +12,7 @@ TEST(testPiEar, http_server) {
     std::atomic<int> bpm = 100;
     std::vector<PiEar::channel*> *chans = generate_channels(5);
     std::thread server( PiEar::mainloop_http_server, &kill, chans, &bpm);
-    sleep(10);
+    sleep(10); // Enough time to manually send requests with Insomnia
     kill = true;
     server.join();
     for (auto &chan : *chans) {

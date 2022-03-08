@@ -4,7 +4,7 @@
   "description": "HTTP Server for PiEar",
   "main": "./server.js",
   "scripts": {
-    "test": "./tests/test_webserver.js"
+    "test": "./server.js kill-test-secret header-test-secret&& ./tests/test_webserver.js"
   },
   "keywords": [
     "http"
