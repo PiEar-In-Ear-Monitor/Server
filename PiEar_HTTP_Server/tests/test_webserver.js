@@ -1,55 +1,13 @@
 #!/usr/bin/env node
 var WebSocketClient = require('websocket').client;
 const http = require('http')
+const {before_ws_tests} = require("./before_websocket_tests");
+const {bpm_tests} = require("./bpm_tests");
+const {channel_name_tests} = require("./channel_name_tests");
+
 console.log("Running tests");
 
-http.get("http://localhost:9090/bpm", (resp) => {
-    let data = '';
-    resp.on("data", (chunk) => {
-        data += chunk;
-    })
-
-    resp.on('end', () => {
-        if (JSON.parse(data)["error"] != "Server not initialized"){
-            console.error('expected "Server not initialized", got ' + data);
-        }
-    })
-}).on("error", (err) => {
-    console.log("Error: " + err.message);
-    process.exit(test_count);
-});
-
-http.get("http://localhost:9090/channel-name", (resp) => {
-    let data = '';
-    resp.on("data", (chunk) => {
-        data += chunk;
-    })
-
-    resp.on('end', () => {
-        if (JSON.parse(data)["error"] != "Server not initialized"){
-            console.error('expected "Server not initialized", got ' + data);
-        }
-    })
-}).on("error", (err) => {
-    console.log("Error: " + err.message);
-    process.exit(test_count);
-});
-
-http.get("http://localhost:9090/does-not-exist", (resp) => {
-    let data = '';
-    resp.on("data", (chunk) => {
-        data += chunk;
-    })
-
-    resp.on('end', () => {
-        if (JSON.parse(data)["error"] != "Server not initialized"){
-            console.error('expected "Server not initialized", got ' + data);
-        }
-    })
-}).on("error", (err) => {
-    console.log("Error: " + err.message);
-    process.exit(test_count);
-});
+before_ws_tests("http://localhost:9090");
 
 let client = new WebSocketClient();
 let connection;
@@ -75,55 +33,9 @@ client.on('connect', function(con) {
         connection.sendUTF(JSON.stringify({"piear_id":index,"channel_name":`Channel ${index + 1}`}));
     }
     connection.sendUTF(JSON.stringify({"BPM":100}));
+
+    bpm_tests("http://localhost:9090");
+    channel_name_tests("http://localhost:9090");
 });
 
 client.connect('ws://localhost:9090/', null, null, {"User-Agent":"PiEar-Server", "Shared-Secret":"hello"});
-
-http.get("http://localhost:9090/bpm", (resp) => {
-    let data = '';
-    resp.on("data", (chunk) => {
-        data += chunk;
-    })
-
-    resp.on('end', () => {
-        if (JSON.parse(data)["error"] != "Server not initialized"){
-            console.error('expected "Server not initialized", got ' + data);
-        }
-    })
-}).on("error", (err) => {
-    console.log("Error: " + err.message);
-    process.exit(test_count);
-});
-
-http.get("http://localhost:9090/channel-name", (resp) => {
-    let data = '';
-    resp.on("data", (chunk) => {
-        data += chunk;
-    })
-
-    resp.on('end', () => {
-        if (JSON.parse(data)["error"] != "Server not initialized"){
-            console.error('expected "Server not initialized", got ' + data);
-        }
-    })
-}).on("error", (err) => {
-    console.log("Error: " + err.message);
-    process.exit(test_count);
-});
-
-http.get("http://localhost:9090/does-not-exist", (resp) => {
-    let data = '';
-    resp.on("data", (chunk) => {
-        data += chunk;
-    })
-
-    resp.on('end', () => {
-        if (JSON.parse(data)["error"] != "Server not initialized"){
-            console.error('expected "Server not initialized", got ' + data);
-        }
-    })
-}).on("error", (err) => {
-    console.log("Error: " + err.message);
-    process.exit(test_count);
-});
-
