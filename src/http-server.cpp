@@ -34,7 +34,7 @@ namespace PiEar {
         ws.set_option(boost::beast::websocket::stream_base::decorator(
             [](boost::beast::websocket::request_type &req) {
                     req.set(boost::beast::http::field::user_agent, "PiEar-Server-1.0");
-                    req.set("Shared-Secret", "Hello-World");
+                    req.set("shared-secret", "Hello-World");
                 }
             ));
 

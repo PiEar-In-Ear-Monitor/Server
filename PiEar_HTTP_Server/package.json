@@ -19,6 +19,7 @@
   "devDependencies": {
     "axios": "^0.26.0",
     "cors": "^2.8.5",
-    "supertest": "^6.2.2"
+    "supertest": "^6.2.2",
+    "superwstest": "^2.0.1"
   }
 }
