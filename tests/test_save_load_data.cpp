@@ -20,7 +20,8 @@ TEST(testPiEar, task_load) {
     boost::filesystem::path full_path = boost::filesystem::path(std::filesystem::temp_directory_path()) / "piear_test_save_load.json";
     auto task = PiEar::task(cha, full_path.string(), 1);
     task.async_run_save_task();
-    sleep(2);
+    while (!std::filesystem::exists(full_path.string())) std::this_thread::yield();
+    sleep(1);
     auto data = load_from_file(full_path);
     ASSERT_EQ(cha->size(), data->size());
     auto initial_count = cha->size();
