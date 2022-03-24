@@ -15,8 +15,8 @@ namespace PiEar {
         // Start server thread
         int server_thread = fork();
         if (!server_thread) {
-            char * const command[] = {"server.js", "kill", "Hello-World", nullptr}; // TODO Randomize Endpoints
-            execve("/home/alex/Documents/Uni-Private/2022/Winter/CPTR-488/Server/PiEar_HTTP_Server/server.js", command, nullptr);
+            char * const command[] = {"main.js", "kill", "Hello-World", nullptr}; // TODO Randomize Endpoints
+            execve("/home/alex/Documents/Uni-Private/2022/Winter/CPTR-488/Server/PiEar_HTTP_Server/main.js", command, nullptr);
             return; // Redundant
         }
         sleep(1);

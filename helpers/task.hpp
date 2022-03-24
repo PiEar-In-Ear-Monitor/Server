@@ -59,7 +59,7 @@ namespace PiEar {
          * }
          * @return std::string representation of a JSON object
          */
-        std::string create_json() {
+        [[nodiscard]] std::string create_json() const {
             std::ostringstream s;
             s << "{\"channels\":[";
             for (auto it = std::begin(*this->channels); it != std::end(*this->channels); it++) {
