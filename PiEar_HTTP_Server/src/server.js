@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-let express = require('express');
-let cors = require('cors')
-const ws = require('ws');
+let express = require("express");
+let cors = require("cors")
+const ws = require("ws");
 let { channelNameValidateId } = require("./Response_Helpers");
 
 const kill_secret = process.argv[2];
@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(function(req, res, next) {
-    res.header('WebServer', 'PiEar-HTTP-Sever');
+    res.header("WebServer", "PiEar-HTTP-Sever");
     if (app.locals.bpm != -1) {
         next();
         return;
@@ -32,7 +32,7 @@ app.get("/bpm", (req, res) => {
 app.get("/channel-name", (req, res) => {
     let id = channelNameValidateId(req.query.id);
     if ( id == false) {
-        res.status(422).json({error: "expected a query, 'id', to be a number"});
+        res.status(422).json({error: "expected a query, \"id\", to be a number"});
         return;
     }
     let found_channel = false;
@@ -51,13 +51,12 @@ app.get("/channel-name", (req, res) => {
 app.put("/bpm", (req, res) => {
     //#region Data validation
     if (req.query.bpm == null || !/[0-9]*/.test(req.query.bpm)) {
-        res.status(422).json({error: "expected query 'bpm' to be a number"});
-        console.warn(`Received bpm of ${req.query.bpm}`);
+        res.status(422).json({error: "expected query \"bpm\" to be a number"});
         return;
     }
     let new_bpm = parseInt(req.query.bpm);
     if (new_bpm < 0 || new_bpm > 255) {
-        res.status(422).json({error: "'bpm' expected to be betwen 0 and 255 (inclusive)"});
+        res.status(422).json({error: "\"bpm\" expected to be betwen 0 and 255 (inclusive)"});
         return;
     }
     //#endregion
@@ -69,14 +68,14 @@ app.put("/bpm", (req, res) => {
 app.put("/channel-name", (req, res) => {
     let id = channelNameValidateId(req.query.id);
     if ( id == false) {
-        res.status(422).json({"error": "expected a query, 'id', to be a number"});
+        res.status(422).json({"error": "expected a query, \"id\", to be a number"});
         return;
     }
     let new_name;
     if (req.query.name != null && /[0-9]*/.test(req.query.name)) {
         new_name = req.query.name.slice(0, 26);
     } else {
-        res.status(422).json({"error": "expected a query, 'name', to consist of only numbers and letters."});
+        res.status(422).json({"error": "expected a query, \"name\", to consist of only numbers and letters."});
         return;
     }
     let found_channel = false;
@@ -113,17 +112,17 @@ function wsHeaderChecker(headers) {
     );
 }
 
-server.on('upgrade', (request, socket, head) => {
+server.on("upgrade", (request, socket, head) => {
     if (wsHeaderChecker(request.headers)) {
         wsServer.handleUpgrade(request, socket, head, socket => {
-            wsServer.emit('connection', socket, request);
+            wsServer.emit("connection", socket, request);
         });
     }
 });
 
-wsServer.on('connection', socket => {
+wsServer.on("connection", socket => {
     ws_connection = socket;
-    socket.on('message', msg => {
+    socket.on("message", msg => {
         let message = msg.toString();
         if (message == kill_secret) {
             socket.close();
@@ -131,15 +130,13 @@ wsServer.on('connection', socket => {
         }
         if (app.locals.bpm == -1) {
             try {
-                let json = JSON.parse(message.replace('\u0000', ''));
+                let json = JSON.parse(message.replace("\u0000", ""));
                 if (json.bpm != null) {
                     app.locals.bpm = json.bpm;
                 } else {
                     app.locals.channels.push({"piear_id": json.piear_id,"channel_name":json.channel_name});
                 }
             } catch (e) {
-                console.log(e);
-                console.log('Try/Catch Message: ' + message);
             }
         }
     });
