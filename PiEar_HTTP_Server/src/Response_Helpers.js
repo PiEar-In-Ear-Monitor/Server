@@ -5,4 +5,6 @@ function channelNameValidateId(id) {
     return false;
 }
 
-module.exports = { channelNameValidateId };
+module.exports = { 
+    channelNameValidateId
+};

@@ -2,9 +2,10 @@
   "name": "piear_http_server",
   "version": "1.0.0",
   "description": "HTTP Server for PiEar",
-  "main": "./main.js",
+  "main": "src/PiEar_HTTP_Server.js",
   "scripts": {
-    "test": "./server.js kill-test-secret header-test-secret & ./tests/test_webserver.js"
+    "preSetup": "tests/beforeSetup.js",
+    "postSetup": "tests/afterSetup.js"
   },
   "keywords": [
     "http"
@@ -12,14 +13,12 @@
   "author": "Alex O'Connor",
   "license": "MIT",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.3",
     "url": "^0.11.0",
     "websocket": "^1.0.34"
   },
   "devDependencies": {
-    "axios": "^0.26.0",
-    "cors": "^2.8.5",
-    "supertest": "^6.2.2",
-    "superwstest": "^2.0.1"
+    "supertest": "^6.2.2"
   }
 }
