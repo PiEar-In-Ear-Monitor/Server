@@ -31,7 +31,7 @@ app.get("/bpm", (req, res) => {
 app.get("/channel-name", (req, res) => {
     let id = channelNameValidateId(req.query.id);
     if ( id == false) {
-        res.status(422).json({error: "expected a query, 'id', to be a number"});
+        res.status(422).json({error: "expected a query, \"id\", to be a number"});
         return;
     }
     let found_channel = false;
@@ -50,13 +50,12 @@ app.get("/channel-name", (req, res) => {
 app.put("/bpm", (req, res) => {
     //#region Data validation
     if (req.query.bpm == null || !/[0-9]*/.test(req.query.bpm)) {
-        res.status(422).json({error: "expected query 'bpm' to be a number"});
-        console.warn(`Received bpm of ${req.query.bpm}`);
+        res.status(422).json({error: "expected query \"bpm\" to be a number"});
         return;
     }
     let new_bpm = parseInt(req.query.bpm);
     if (new_bpm < 0 || new_bpm > 255) {
-        res.status(422).json({error: "'bpm' expected to be betwen 0 and 255 (inclusive)"});
+        res.status(422).json({error: "\"bpm\" expected to be betwen 0 and 255 (inclusive)"});
         return;
     }
     //#endregion
@@ -109,7 +108,7 @@ app.ws(`/${websocket_shared_secret}`, (ws, req) => {
         let message = msg.toString();
         if (app.locals.bpm == -1) {
             try {
-                let json = JSON.parse(message.replace('\u0000', ''));
+                let json = JSON.parse(message.replace("\u0000", ""));
                 if (json.bpm != null) {
                     app.locals.bpm = json.bpm;
                 } else {

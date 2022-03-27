@@ -17,7 +17,7 @@
 #define PIEAR_SERVER_AUDIO_H
 
 namespace PiEar {
-
+    void audio_thread();
 }
 
 #endif //PIEAR_SERVER_AUDIO_H
