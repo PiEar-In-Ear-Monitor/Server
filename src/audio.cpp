@@ -1,42 +1,44 @@
 #include "audio.h"
-#include <pipewire/pipewire.h>
+#include <portaudio.h>
 #include <vector>
 #include <iostream>
 
 namespace PiEar {
-//    std::vector<std::vector<float>> audio_buffer;
-//
-//    void audio_init() {
-//        audio_buffer.resize(PIPEWIRE_CHANNELS);
-//        for (auto& channel : audio_buffer) {
-//            channel.resize(AUDIO_BUFFER_SIZE);
-//        }
-//    }
-//
-//    void audio_get_samples(float* samples, int num_samples) {
-//        for (int i = 0; i < num_samples; i++) {
-//            for (int channel = 0; channel < PIPEWIRE_CHANNELS; channel++) {
-//                samples[i * PIPEWIRE_CHANNELS + channel] = audio_buffer[channel][i];
-//            }
-//        }
-//    }
-//
-//    void audio_set_samples(const float* samples, int num_samples) {
-//        for (int i = 0; i < num_samples; i++) {
-//            for (int channel = 0; channel < PIPEWIRE_CHANNELS; channel++) {
-//                audio_buffer[channel][i] = samples[i * PIPEWIRE_CHANNELS + channel];
-//            }
-//        }
-//    }
-
     void audio_thread() {
-
-        pw_init(nullptr, 0);
-
-        fprintf(stdout, "Compiled with libpipewire %s\n"
-                        "Linked with libpipewire %s\n",
-                pw_get_headers_version(),
-                pw_get_library_version());
+        int err = Pa_Initialize();
+        if( err != paNoError ) std::cout << "PortAudio error: " << Pa_GetErrorText(err) << std::endl;
+        else std::cout << "PortAudio initialized" << std::endl;
+        // Find out how many devices there are
+        int numDevices = Pa_GetDeviceCount();
+        std::cout << "Number of devices: " << numDevices << std::endl;
+        // Print out the names of the devices
+        for( int i = 0; i < numDevices; i++ ) {
+            const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(i);
+            std::cout << "Device " << i << ": " << deviceInfo->name << std::endl;
+        }
+        // Open the default device
+        PaStream* stream;
+        err = Pa_OpenDefaultStream( &stream, 0, 1, paFloat32, 44100, 1024, NULL, NULL );
+        if( err != paNoError ) std::cout << "PortAudio error: " << Pa_GetErrorText(err) << std::endl;
+        else std::cout << "PortAudio stream opened" << std::endl;
+        // Start the stream
+        err = Pa_StartStream( stream );
+        if( err != paNoError ) std::cout << "PortAudio error: " << Pa_GetErrorText(err) << std::endl;
+        else std::cout << "PortAudio stream started" << std::endl;
+        // For loop waiting for input
+        while( true ) {
+            // Wait for input
+            std::string input;
+            std::cin >> input;
+            if (input == "quit") break;
+        }
+        if( err != paNoError ) std::cout << "PortAudio error: " << Pa_GetErrorText(err) << std::endl;
+        else std::cout << "PortAudio stream finished" << std::endl;
+        // Close the stream
+        err = Pa_CloseStream( stream );
+        if( err != paNoError ) std::cout << "PortAudio error: " << Pa_GetErrorText(err) << std::endl;
+        else std::cout << "PortAudio stream closed" << std::endl;
+        // Terminate PortAudio
+        Pa_Terminate();
     }
-
 }

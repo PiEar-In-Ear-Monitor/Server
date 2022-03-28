@@ -7,7 +7,7 @@ include_directories(include)
 include_directories(helpers)
 file(GLOB SOURCES "src/*.cpp")
 add_executable(PiEar ${SOURCES})
-target_link_libraries(PiEar pthread boost_filesystem boost_system pipewire-0.2)
+target_link_libraries(PiEar pthread boost_filesystem boost_system portaudio)
 
 if(PACKAGE_TESTS)
     enable_testing()
@@ -27,7 +27,7 @@ if(PACKAGE_TESTS)
     target_link_libraries(Multicast_Test gtest gtest_main pthread boost_system)
 
     package_add_test(Audio_Test src/audio.cpp tests/test_audio.cpp)
-    target_link_libraries(Audio_Test gtest gtest_main pthread pipewire-0.2)
+    target_link_libraries(Audio_Test gtest gtest_main pthread portaudio)
 
     package_add_test(Http_Server_Test src/http-server.cpp tests/test_http-server.cpp)
     target_link_libraries(Http_Server_Test PUBLIC gtest gtest_main pthread boost_system)
