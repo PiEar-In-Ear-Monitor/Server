@@ -1,0 +1,59 @@
+openapi: '3.0.2'
+info:
+  title: PiEar REST API
+  version: '1.0'
+servers:
+  - url: http://localhost:9090
+paths:
+  /channel-name:
+    description: Get and set a channel name
+    parameters: 
+      - in: query
+        name: id
+        schema:
+          type: integer
+        required: true
+        description: ID of the channel to get the name of
+    get:
+      description: Get the channel name
+      responses:
+        '200':
+          description: OK
+    put:
+      description: Set the channel name
+      responses:
+        '200':
+          description: OK
+      parameters: 
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: true
+          description: new name of the channel
+  /bpm:
+    description: Get and set the bpm
+    get:
+      description: Get the current BPM
+      responses:
+        '200':
+          description: OK
+    put:
+      description: Set the current BPM
+      responses:
+        '200':
+          description: OK
+      parameters: 
+        - in: query
+          name: bpm
+          schema:
+            type: integer
+          required: true
+          description: new bpm
+  /abcdefghijklmnopqrstuvwxyz:
+    description: Endpoint to locate server
+    get:
+      description: Returns alphabet backwards
+      responses:
+        '200':
+          description: zyxwvutsrqponmlkjihgfedcba
