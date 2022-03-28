@@ -26,6 +26,4 @@ async function beforeTest(app) {
         })
 }
 
-(async () => { 
-    await beforeTest("http://localhost:9090");
-})()
+beforeTest("http://localhost:9090");

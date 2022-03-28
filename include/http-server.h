@@ -24,7 +24,7 @@ namespace PiEar {
      * @details On port 9090, this webserver is a getter/setter for the labels and cpm
      * @param std::atomic<bool> This is the kill swtitch for the http server
      */
-    void mainloop_http_server(std::atomic<bool>*, std::vector<channel*>*, std::atomic<int>*);
+    void mainloop_http_server(std::atomic<bool>*, std::vector<channel*>*, std::atomic<int>*, const std::string&, int);
 
     void kill_server_waiter(int, std::atomic<bool>*);
 }

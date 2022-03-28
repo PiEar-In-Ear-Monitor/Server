@@ -45,6 +45,4 @@ async function afterSetup(app) {
         .catch(err => console.log(err));
 }
 
-(async () => {
-    await afterSetup("http://localhost:9090");
-})()
+afterSetup("http://localhost:9090");

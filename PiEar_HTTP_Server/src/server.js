@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(cors());
 app.use(function(req, res, next) {
     res.header('WebServer', 'PiEar-HTTP-Sever');
-    if (app.locals.bpm != -1 || req.url == "/abcdefghijklmnopqrstuvwxyz" || req.headers["upgrade"] != null) {
+    if (app.locals.bpm != -1 || req.url == "/abcdefghijklmnopqrstuvwxyz" || req.headers["shared-secret"] == websocket_shared_secret) {
         next();
     } else {
         res.status(200).json({error: "Server not initialized"});            
@@ -102,7 +102,7 @@ app.get("/abcdefghijklmnopqrstuvwxyz", (req, res) => {
 
 app.listen(9090);
 
-app.ws(`/${websocket_shared_secret}`, (ws, req) => {
+app.ws(`/`, (ws, req) => {
     ws_connection = ws;
     ws.on('message', (msg) => {
         let message = msg.toString();

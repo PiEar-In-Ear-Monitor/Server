@@ -31,7 +31,7 @@ namespace PiEar {
 
     void audio_thread() {
 
-        pw_init(NULL, 0);
+        pw_init(nullptr, 0);
 
         fprintf(stdout, "Compiled with libpipewire %s\n"
                         "Linked with libpipewire %s\n",
