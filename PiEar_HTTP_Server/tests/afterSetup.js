@@ -28,11 +28,35 @@ async function afterSetup(app) {
         })
         .catch(err => console.log(err));
     await request('http://localhost:9090')
-        .put('/channel-name?id=2&name=Hello')
+        .put('/channel-name?id=1&name=Some_Name')
         .expect('Content-Type', /json/)
         .expect(200)
         .then(response => {
-            assert(response.body.channel_name, 'Hello')
+            assert(response.body.channel_name, 'Some_Name')
+        })
+        .catch(err => console.log(err));
+    await request('http://localhost:9090')
+        .put('/channel-name?id=2&name=Keyboard')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+            assert(response.body.channel_name, 'Keyboard')
+        })
+        .catch(err => console.log(err));
+    await request('http://localhost:9090')
+        .put('/channel-name?id=3&name=Guitar')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+            assert(response.body.channel_name, 'Guitar')
+        })
+        .catch(err => console.log(err));
+    await request('http://localhost:9090')
+        .put('/channel-name?id=4&name=New_Channel')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+            assert(response.body.channel_name, 'New_Channel')
         })
         .catch(err => console.log(err));
     await request('http://localhost:9090')

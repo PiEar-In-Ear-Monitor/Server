@@ -61,7 +61,7 @@ app.put("/bpm", (req, res) => {
     //#endregion
     app.locals.bpm = new_bpm;
     if(ws_connection != null) {
-        ws_connection.sendUTF(JSON.stringify({bpm: new_bpm}));
+        ws_connection.send(JSON.stringify({bpm: new_bpm}));
     }
     res.status(200).json({bpm: new_bpm});
 });
@@ -84,7 +84,7 @@ app.put("/channel-name", (req, res) => {
         if (channel.piear_id == id) {
             channel.channel_name = new_name;
             if(ws_connection != null) {
-                ws_connection.sendUTF(JSON.stringify({piear_id: id, channel_name: new_name}));
+                ws_connection.send(JSON.stringify({piear_id: id, channel_name: new_name}));
             }
             res.status(200).json({channel_name: channel.channel_name});
             found_channel = true;

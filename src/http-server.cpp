@@ -48,7 +48,7 @@ namespace PiEar {
             ws.write(boost::asio::buffer(std::string(*chan)));
         }
         std::stringstream bpm_string;
-        bpm_string << "{\"BPM\":" << *bpm << "}";
+        bpm_string << "{\"bpm\":" << *bpm << "}";
         ws.write(boost::asio::buffer(bpm_string.str()));
 
         std::thread kill_server_thread(kill_server_waiter, server_thread, kill_switch);

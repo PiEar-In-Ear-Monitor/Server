@@ -7,19 +7,11 @@
 #include <vector>
 #include <iostream>
 
-void print(const std::vector<PiEar::channel*>& channels, std::atomic<int>& bpm) {
-    for (auto channel : channels) {
-        std::cout << (std::string)*channel << std::endl;
-    }
-    std::cout << "BPM: " << bpm << std::endl;
-}
-
 TEST(testPiEar, http_server) {
     std::atomic<bool> kill = false;
     std::atomic<int> bpm = 100;
-    std::vector<PiEar::channel*> *chans = generate_channels(5);
-    print(*chans, bpm);
-    std::thread server( PiEar::mainloop_http_server, &kill, chans, &bpm, "ws_test", 2);
+    std::vector<PiEar::channel*> *channels = generate_channels(5);
+    std::thread server(PiEar::mainloop_http_server, &kill, channels, &bpm, "ws_test", 2);
     sleep(1);
     int node_thread = fork();
     if (!node_thread) {
@@ -46,6 +38,10 @@ TEST(testPiEar, http_server) {
     waitpid(node_thread, 0, 0);
     kill = true;
     server.join();
-    print(*chans, bpm);
-    EXPECT_EQ(1000, 1000);
+    EXPECT_EQ((*channels)[0]->channel_name, "Channel 0");
+    EXPECT_EQ((*channels)[1]->channel_name, "Some_Name");
+    EXPECT_EQ((*channels)[2]->channel_name, "Keyboard");
+    EXPECT_EQ((*channels)[3]->channel_name, "Guitar");
+    EXPECT_EQ((*channels)[4]->channel_name, "New_Channel");
+    EXPECT_EQ(bpm, 200);
 }
