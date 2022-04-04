@@ -4,6 +4,7 @@
 #include <iostream>
 
 namespace PiEar {
+    
     void audio_thread() {
         int err = Pa_Initialize();
         if( err != paNoError ) std::cout << "PortAudio error: " << Pa_GetErrorText(err) << std::endl;
