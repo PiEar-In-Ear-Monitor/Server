@@ -24,13 +24,13 @@
 #include <nlohmann/json.hpp>
 
 namespace PiEar {
-    std::string get_file_contents(std::string);
+    std::string get_file_contents(const std::string&);
     std::vector<PiEar::channel *> *process_array(std::string *, const std::string &);
 
 
-    std::string get_file_contents(std::string view_path) {
+    std::string get_file_contents(const std::string& view_path) {
         constexpr auto read_size = std::size_t(4096);
-        auto stream = std::ifstream(view_path.data());
+        auto stream = std::ifstream(view_path, std::ios::binary);
         auto out = std::string();
         auto buf = std::string(read_size, '\0');
         while (stream.read(&buf[0], read_size)) out.append(buf, 0, stream.gcount());

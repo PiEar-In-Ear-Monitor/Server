@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cstdio>
 
+#define DIRECTORY_SEPARATOR "/"
 std::vector<PiEar::channel*> *load_from_file(const std::string& path) {
     std::string data = PiEar::get_file_contents(path);
     std::string key = "channels";
@@ -18,8 +19,7 @@ std::vector<PiEar::channel*> *load_from_file(const std::string& path) {
 TEST(testPiEar, task_load) {
     auto cha = generate_channels(3); // std::tmpnam(nullptr);
 //    boost::filesystem::path full_path = boost::filesystem::path(std::filesystem::temp_directory_path()) / "piear_test_save_load.json";
-    char filename[] = "piear_test_save_load.json";
-    std::string full_path = std::tmpnam(filename);
+    std::string full_path = std::filesystem::temp_directory_path().string() + DIRECTORY_SEPARATOR + "piear_test_save_load.json";
     auto task = PiEar::task(cha, full_path, 1);
     task.async_run_save_task();
     while (!std::filesystem::exists(full_path)) std::this_thread::yield();
