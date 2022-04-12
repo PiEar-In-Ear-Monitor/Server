@@ -33,6 +33,6 @@ if(PACKAGE_TESTS)
     target_link_libraries(Http_Server_Test PUBLIC gtest gtest_main pthread boost_system)
 
     package_add_test(Save_Load_Data_Test tests/test_save_load_data.cpp)
-    target_link_libraries(Save_Load_Data_Test PUBLIC gtest gtest_main pthread boost_filesystem boost_system)
+    target_link_libraries(Save_Load_Data_Test PUBLIC gtest gtest_main pthread)
 endif()
 
