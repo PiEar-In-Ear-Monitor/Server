@@ -25,7 +25,7 @@ TEST(testPiEar, http_server) {
     // Run command and wait for it to finish
     int status;
     waitpid(node_thread, &status, 0);
-    sleep(2); // Enough time to manually send requests with Insomnia
+    sleep(2); // Wait for server to initialize
     node_thread = fork();
     if (!node_thread) {
         std::vector<char*> server_args;
