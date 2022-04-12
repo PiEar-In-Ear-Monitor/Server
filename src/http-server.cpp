@@ -11,15 +11,19 @@
 #include <nlohmann/json.hpp>
 
 namespace PiEar {
-    void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm) {
+    void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm, const std::string& ws_secret, int delay) {
         // Start server thread
         int server_thread = fork();
         if (!server_thread) {
-            char * const command[] = {"server.js", "kill", "Hello-World", nullptr}; // TODO Randomize Endpoints
-            execve("/home/alex/Documents/Uni-Private/2022/Winter/CPTR-488/Server/PiEar_HTTP_Server/server.js", command, nullptr);
+            std::vector<char*> server_args;
+            server_args.push_back(const_cast<char*>("PiEar_HTTP_Server.js"));
+            server_args.push_back(const_cast<char*>(ws_secret.c_str()));
+            server_args.push_back(nullptr);
+            char **command = server_args.data();
+            execve("../PiEar_HTTP_Server/src/PiEar_HTTP_Server.js", &command[0], nullptr);
             return; // Redundant
         }
-        sleep(1);
+        sleep(delay);
         std::string host = "localhost";
         std::string port = "9090";
         boost::asio::io_context ioc;
@@ -32,9 +36,9 @@ namespace PiEar {
 
         // Set a decorator to change the User-Agent of the handshake
         ws.set_option(boost::beast::websocket::stream_base::decorator(
-            [](boost::beast::websocket::request_type &req) {
+            [ws_secret](boost::beast::websocket::request_type &req) {
                     req.set(boost::beast::http::field::user_agent, "PiEar-Server-1.0");
-                    req.set("Shared-Secret", "Hello-World");
+                    req.set("shared-secret", ws_secret);
                 }
             ));
 
@@ -44,7 +48,7 @@ namespace PiEar {
             ws.write(boost::asio::buffer(std::string(*chan)));
         }
         std::stringstream bpm_string;
-        bpm_string << "{\"BPM\":" << *bpm << "}";
+        bpm_string << "{\"bpm\":" << *bpm << "}";
         ws.write(boost::asio::buffer(bpm_string.str()));
 
         std::thread kill_server_thread(kill_server_waiter, server_thread, kill_switch);
@@ -80,7 +84,7 @@ namespace PiEar {
     }
 
     void kill_server_waiter(int to_kill, std::atomic<bool> *kill_server) {
-        while (!*kill_server);
+        while (!*kill_server) std::this_thread::yield();
         kill(to_kill, SIGTERM);
     }
 }

@@ -18,5 +18,6 @@
 
 TEST(testPiEar, audio_test)
 {
+    PiEar::audio_thread();
     EXPECT_EQ(1000, 1000);
 }
