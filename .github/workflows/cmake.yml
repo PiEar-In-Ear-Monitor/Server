@@ -26,11 +26,11 @@ jobs:
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Install Boost, JSON and gtest libraries 
-      run: sudo apt-get update && sudo apt-get install -yq libboost-all-dev nlohmann-json3-dev libgtest-dev
+      run: sudo apt-get update && sudo apt-get install -yq libboost-all-dev nlohmann-json3-dev libgtest-dev libpipewire-0.2-dev nodejs
 
     - name: Build
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}; npm --prefix ${{github.workspace}}/PiEar_HTTP_Server install
 
     - name: Test
       working-directory: ${{github.workspace}}/build
