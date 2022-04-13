@@ -24,6 +24,11 @@ app.use(function(req, res, next) {
 
 app.locals.bpm = -1;
 app.locals.channels = [];
+
+app.get("/", (req, res) => {
+    res.status(200).json({"channel_count": app.locals.channels.length});
+});
+
 app.get("/bpm", (req, res) => {
     res.status(200).json({bpm: app.locals.bpm});
 });
