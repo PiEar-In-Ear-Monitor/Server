@@ -23,17 +23,20 @@ app.use(function(req, res, next) {
 });
 
 app.locals.bpm = -1;
+app.locals.newBPM = false;
 app.locals.channels = [];
-
-app.get("/", (req, res) => {
-    res.status(200).json({"channel_count": app.locals.channels.length});
-});
+app.locals.chanChanges = [];
+app.locals.sse = [];
 
 app.get("/bpm", (req, res) => {
     res.status(200).json({bpm: app.locals.bpm});
 });
 
 app.get("/channel-name", (req, res) => {
+    if (Object.keys(req.query).length === 0) {
+        res.status(200).json({channel_count: app.locals.channels.length});
+        return;
+    }
     let id = channelNameValidateId(req.query.id);
     if ( id == false) {
         res.status(422).json({error: "expected a query, \"id\", to be a number"});
@@ -59,12 +62,13 @@ app.put("/bpm", (req, res) => {
         return;
     }
     let new_bpm = parseInt(req.query.bpm);
-    if (new_bpm < 0 || new_bpm > 255) {
+    if (new_bpm <= 0 || new_bpm >= 255) {
         res.status(422).json({error: "\"bpm\" expected to be betwen 0 and 255 (inclusive)"});
         return;
     }
     //#endregion
     app.locals.bpm = new_bpm;
+    app.locals.newBPM = true;
     if(ws_connection != null) {
         ws_connection.send(JSON.stringify({bpm: new_bpm}));
     }
@@ -88,6 +92,7 @@ app.put("/channel-name", (req, res) => {
     app.locals.channels.forEach(channel => {
         if (channel.piear_id == id) {
             channel.channel_name = new_name;
+            app.locals.chanChanges.push({id: id, channel_name: new_name});
             if(ws_connection != null) {
                 ws_connection.send(JSON.stringify({piear_id: id, channel_name: new_name}));
             }
@@ -130,5 +135,43 @@ app.ws(`/`, (ws, req) => {
         ws_connection = null;
     });
 });
+
+app.get('/channel-name/listen', (req, res) => {
+    console.log('SSE Subscriber!!!');
+    res.set({
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream',
+        'Connection': 'keep-alive'
+    });
+    res.flushHeaders();
+    app.locals.sse.push(res);
+});
+
+function SSE() {
+    sendSSEBPM();
+    sendSSEChannels();
+}
+
+function sendSSEBPM() {
+    if (app.locals.newBPM) {
+        console.log("Sending BPM", app.locals.bpm);
+        app.locals.sse.forEach(res => {
+            res.write(JSON.stringify({bpm: app.locals.bpm} + "\n\n"));
+        });
+        app.locals.newBPM = false;
+    }
+}
+
+function sendSSEChannels() {
+    app.locals.chanChanges.forEach(newChan => {
+        console.log(newChan);
+        app.locals.sse.forEach(res => {
+            res.write(JSON.stringify({id: newChan.id, channel_name: newChan.channel_name} + "\n\n"));
+        });
+        app.locals.chanChanges.splice(app.locals.chanChanges.indexOf(newChan), 1);
+    });
+}
+
+setInterval(SSE, 500);
 
 module.exports = { app };
