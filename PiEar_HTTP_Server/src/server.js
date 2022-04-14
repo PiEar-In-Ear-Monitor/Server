@@ -23,9 +23,7 @@ app.use(function(req, res, next) {
 });
 
 app.locals.bpm = -1;
-app.locals.newBPM = false;
 app.locals.channels = [];
-app.locals.chanChanges = [];
 app.locals.sse = [];
 
 app.get("/bpm", (req, res) => {
@@ -68,7 +66,7 @@ app.put("/bpm", (req, res) => {
     }
     //#endregion
     app.locals.bpm = new_bpm;
-    app.locals.newBPM = true;
+    sendSSE(`bpm: ${app.locals.bpm}`);
     if(ws_connection != null) {
         ws_connection.send(JSON.stringify({bpm: new_bpm}));
     }
@@ -92,7 +90,7 @@ app.put("/channel-name", (req, res) => {
     app.locals.channels.forEach(channel => {
         if (channel.piear_id == id) {
             channel.channel_name = new_name;
-            app.locals.chanChanges.push({id: id, channel_name: new_name});
+            sendSSE({id: id, channel_name: new_name})
             if(ws_connection != null) {
                 ws_connection.send(JSON.stringify({piear_id: id, channel_name: new_name}));
             }
@@ -145,33 +143,12 @@ app.get('/channel-name/listen', (req, res) => {
     });
     res.flushHeaders();
     app.locals.sse.push(res);
+    res.on('close', () => {app.locals.sse = app.locals.sse.filter(sse => sse != res);});
 });
 
-function SSE() {
-    sendSSEBPM();
-    sendSSEChannels();
+function sendSSE(data) {
+    console.log("Sending: ", data);
+    app.locals.sse.forEach(res => {res.write(`data: ${data}\n\n`);});
 }
-
-function sendSSEBPM() {
-    if (app.locals.newBPM) {
-        console.log("Sending BPM", app.locals.bpm);
-        app.locals.sse.forEach(res => {
-            res.write(JSON.stringify({bpm: app.locals.bpm} + "\n\n"));
-        });
-        app.locals.newBPM = false;
-    }
-}
-
-function sendSSEChannels() {
-    app.locals.chanChanges.forEach(newChan => {
-        console.log(newChan);
-        app.locals.sse.forEach(res => {
-            res.write(JSON.stringify({id: newChan.id, channel_name: newChan.channel_name} + "\n\n"));
-        });
-        app.locals.chanChanges.splice(app.locals.chanChanges.indexOf(newChan), 1);
-    });
-}
-
-setInterval(SSE, 500);
 
 module.exports = { app };

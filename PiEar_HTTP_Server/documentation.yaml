@@ -7,23 +7,31 @@ servers:
 paths:
   /channel-name:
     description: Get and set a channel name
-    parameters: 
-      - in: query
-        name: id
-        schema:
-          type: integer
-        required: true
-        description: ID of the channel to get the name of
     get:
-      description: Get the channel name
+      description: Get channel count
+      parameters: 
+        - in: query
+          name: id
+          schema:
+            type: integer
+          required: false
+          description: ID of the channel to get the name of
       responses:
         '200':
-          description: OK
+          description: Channel information. If id is not set, the channel count is returned.
+          content:
+            application/json:
+              schema:
+                type: object
     put:
       description: Set the channel name
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
       parameters: 
         - in: query
           name: name
@@ -31,6 +39,12 @@ paths:
             type: string
           required: true
           description: new name of the channel
+        - in: query
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID of the channel to get the name of
   /bpm:
     description: Get and set the bpm
     get:
@@ -38,11 +52,19 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
     put:
       description: Set the current BPM
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
       parameters: 
         - in: query
           name: bpm
@@ -56,4 +78,8 @@ paths:
       description: Returns alphabet backwards
       responses:
         '200':
-          description: zyxwvutsrqponmlkjihgfedcba
+          description: OK
+          content:
+            plain/text:
+              schema:
+                type: object
