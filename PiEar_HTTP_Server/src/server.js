@@ -66,7 +66,7 @@ app.put("/bpm", (req, res) => {
     }
     //#endregion
     app.locals.bpm = new_bpm;
-    sendSSE(`bpm: ${app.locals.bpm}`);
+    sendSSE({bpm: app.locals.bpm});
     if(ws_connection != null) {
         ws_connection.send(JSON.stringify({bpm: new_bpm}));
     }
@@ -143,12 +143,12 @@ app.get('/channel-name/listen', (req, res) => {
     });
     res.flushHeaders();
     app.locals.sse.push(res);
-    res.on('close', () => {app.locals.sse = app.locals.sse.filter(sse => sse != res);});
+    res.on('close', () => {app.locals.sse = app.locals.sse.filter(sse => sse != res); console.log("SSE Sub Lost :_c");});
 });
 
 function sendSSE(data) {
     console.log("Sending: ", data);
-    app.locals.sse.forEach(res => {res.write(`data: ${data}\n\n`);});
+    app.locals.sse.forEach(res => {res.write(`data: ${JSON.stringify(data)}\n\n`);});
 }
 
 module.exports = { app };
