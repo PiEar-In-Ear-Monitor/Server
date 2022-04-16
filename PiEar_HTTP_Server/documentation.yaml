@@ -70,7 +70,13 @@ paths:
           name: bpm
           schema:
             type: integer
-          required: true
+          required: false
+          description: new bpm
+        - in: query
+          name: bpmEnabled
+          schema:
+            type: boolean
+          required: false
           description: new bpm
   /abcdefghijklmnopqrstuvwxyz:
     description: Endpoint to locate server

@@ -2,13 +2,14 @@
 const request = require('supertest');
 const assert = require('assert');
 
-async function afterSetup(app) {
+async function afterSetup() {
     await request('http://localhost:9090')
         .get('/bpm')
         .expect('Content-Type', /json/)
         .expect(200)
         .then(response => {
             assert(response.body.bpm, '100');
+            assert(response.body.bpm_enabled, "false");
         })
         .catch(err => console.log(err));
     await request('http://localhost:9090')
@@ -65,6 +66,31 @@ async function afterSetup(app) {
         .expect(404)
         .then(response => {
             assert(response.text, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot PUT /endpoint_dne</pre>\n</body>\n</html>");
+        })
+        .catch(err => console.log(err));
+    await request('http://localhost:9090')
+        .put('/bpm?bpmEnabled=True')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+            assert(response.body.bpm_enabled, 'true');
+        })
+        .catch(err => console.log(err));
+    await request('http://localhost:9090')
+        .get('/bpm')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+            assert(response.body.bpm, '200');
+            assert(response.body.bpm_enabled, "true");
+        })
+        .catch(err => console.log(err));
+    await request('http://localhost:9090')
+        .get('/channel-name?id=1')
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .then(response => {
+            assert(response.body.channel_name, 'Some_Name');
         })
         .catch(err => console.log(err));
 }

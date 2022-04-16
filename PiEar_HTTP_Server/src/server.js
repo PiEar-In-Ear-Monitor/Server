@@ -2,19 +2,14 @@
 const express = require('express');
 const app = express();
 require('express-ws')(app);
-let cors = require('cors')
-let { channelNameValidateId } = require("./Response_Helpers");
-let websocket_shared_secret = "";
-let ws_connection = null;
-if (process.argv.length == 3) {
-    websocket_shared_secret = process.argv[2];
-}
+const cors = require('cors')
+const { validBpm, validBpmEnabled, validChannelName, validNumber } = require("./Response_Helpers");
 
 app.use(express.json());
 app.use(cors());
 app.use(function(req, res, next) {
     res.header('WebServer', 'PiEar-HTTP-Sever');
-    if (app.locals.bpm != -1 || req.url == "/abcdefghijklmnopqrstuvwxyz" || req.headers["shared-secret"] == websocket_shared_secret) {
+    if (app.locals.bpm != -1 || req.url == "/abcdefghijklmnopqrstuvwxyz" || req.headers["shared-secret"] == app.locals.ws_secret) {
         next();
     } else {
         res.status(200).json({error: "Server not initialized"});            
@@ -23,11 +18,14 @@ app.use(function(req, res, next) {
 });
 
 app.locals.bpm = -1;
+app.locals.bpmEnabled = "false";
 app.locals.channels = [];
 app.locals.sse = [];
+app.locals.ws_connection = null;
+app.locals.ws_secret = (process.argv.length == 3)? process.argv[2] : "";
 
 app.get("/bpm", (req, res) => {
-    res.status(200).json({bpm: app.locals.bpm});
+    res.status(200).json({bpm: app.locals.bpm, bpm_enabled: app.locals.bpmEnabled});
 });
 
 app.get("/channel-name", (req, res) => {
@@ -35,73 +33,58 @@ app.get("/channel-name", (req, res) => {
         res.status(200).json({channel_count: app.locals.channels.length});
         return;
     }
-    let id = channelNameValidateId(req.query.id);
-    if ( id == false) {
+    let id = validNumber(req.query.id);
+    if ( id == null) {
         res.status(422).json({error: "expected a query, \"id\", to be a number"});
         return;
     }
-    let found_channel = false;
-    app.locals.channels.forEach(channel => {
-        if (channel.piear_id == id) {
-            res.status(200).json({channel_name: channel.channel_name});
-            found_channel = true;
-            return;
-        }
-    });
-    if (!found_channel) {
+    let final = app.locals.channels.filter(channel => channel.piear_id == id);
+    if (final.length == 0) {
         res.status(422).json({error: `Cannot find channel with id ${id}`});
+        return;
     }
+    res.status(200).json({channel_name: final[0].channel_name});
 });
 
 app.put("/bpm", (req, res) => {
-    //#region Data validation
-    if (req.query.bpm == null || !/[0-9]*/.test(req.query.bpm)) {
-        res.status(422).json({error: "expected query \"bpm\" to be a number"});
+    let enable = validBpmEnabled(req.query.bpmEnabled);
+    let bpm = validBpm(req.query.bpm);
+    final = {};
+    if (enable == null && bpm == null) {
+        res.status(422).json({error: "expected a query, \"bpmEnabled\", or \"bpm\", to be a number"});
         return;
     }
-    let new_bpm = parseInt(req.query.bpm);
-    if (new_bpm <= 0 || new_bpm >= 255) {
-        res.status(422).json({error: "\"bpm\" expected to be betwen 0 and 255 (inclusive)"});
-        return;
+    if (enable != null) {
+        app.locals.bpmEnabled = enable;
+        final.bpm_enabled = enable;
     }
-    //#endregion
-    app.locals.bpm = new_bpm;
-    sendSSE({bpm: app.locals.bpm});
-    if(ws_connection != null) {
-        ws_connection.send(JSON.stringify({bpm: new_bpm}));
+    if (bpm != null) {
+        app.locals.bpm = bpm;
+        final.bpm = bpm;
     }
-    res.status(200).json({bpm: new_bpm});
+    sendUpdates(final);
+    res.status(200).json(final);
 });
 
 app.put("/channel-name", (req, res) => {
-    let id = channelNameValidateId(req.query.id);
-    if ( id == false) {
+    let id = validNumber(req.query.id);
+    if ( id == null) {
         res.status(422).json({error: "expected a query, 'id', to be a number"});
         return;
     }
-    let new_name;
-    if (req.query.name != null && /[0-9]*/.test(req.query.name)) {
-        new_name = req.query.name.slice(0, 26);
-    } else {
+    let new_name = validChannelName(req.query.name);
+    if (new_name == null) {
         res.status(422).json({error: "expected a query, 'name', to consist of only numbers and letters."});
         return;
     }
-    let found_channel = false;
-    app.locals.channels.forEach(channel => {
-        if (channel.piear_id == id) {
-            channel.channel_name = new_name;
-            sendSSE({id: id, channel_name: new_name})
-            if(ws_connection != null) {
-                ws_connection.send(JSON.stringify({piear_id: id, channel_name: new_name}));
-            }
-            res.status(200).json({channel_name: channel.channel_name});
-            found_channel = true;
-            return;
-        }
-    });
-    if (!found_channel) {
+    let final = app.locals.channels.filter(chan => chan.piear_id == id);
+    if (final.length != 1) {
         res.status(422).json({error: `Cannot find channel with id ${id}`});
+        return;
     }
+    final[0].channel_name = new_name;
+    sendUpdates({piear_id: id, channel_name: new_name});
+    res.status(200).json({channel_name: new_name});
 });
 
 app.get("/abcdefghijklmnopqrstuvwxyz", (req, res) => {
@@ -111,7 +94,7 @@ app.get("/abcdefghijklmnopqrstuvwxyz", (req, res) => {
 app.listen(9090);
 
 app.ws(`/`, (ws, req) => {
-    ws_connection = ws;
+    app.locals.ws_connection = ws;
     ws.on('message', (msg) => {
         let message = msg.toString();
         if (app.locals.bpm == -1) {
@@ -120,22 +103,19 @@ app.ws(`/`, (ws, req) => {
                 if (json.bpm != null) {
                     app.locals.bpm = json.bpm;
                 } else {
-                    app.locals.channels.push({piear_id: json.piear_id,channel_name:json.channel_name});
+                    app.locals.channels.push({piear_id: json.piear_id, channel_name:json.channel_name});
                 }
             } catch (e) {
-                if (e == "fake") {
-                    return;
-                }
+                return;
             }
         }
     });
     ws.on('close', () => {
-        ws_connection = null;
+        app.locals.ws_connection = null;
     });
 });
 
 app.get('/channel-name/listen', (req, res) => {
-    console.log('SSE Subscriber!!!');
     res.set({
         'Cache-Control': 'no-cache',
         'Content-Type': 'text/event-stream',
@@ -143,12 +123,14 @@ app.get('/channel-name/listen', (req, res) => {
     });
     res.flushHeaders();
     app.locals.sse.push(res);
-    res.on('close', () => {app.locals.sse = app.locals.sse.filter(sse => sse != res); console.log("SSE Sub Lost :_c");});
+    res.on('close', () => {app.locals.sse = app.locals.sse.filter(sse => sse != res);});
 });
 
-function sendSSE(data) {
-    console.log("Sending: ", data);
+function sendUpdates(data) {
     app.locals.sse.forEach(res => {res.write(`data: ${JSON.stringify(data)}\n\n`);});
+    if (app.locals.ws_connection != null) {
+        app.locals.ws_connection.send(JSON.stringify(data));
+    }
 }
 
 module.exports = { app };
