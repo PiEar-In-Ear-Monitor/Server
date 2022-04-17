@@ -23,35 +23,35 @@ async function afterSetup() {
         .expect("Content-Type", /json/)
         .expect(200)
         .then((response) => {
-            assert(response.body.channel_name, "Channel 2")
+            assert(response.body.channel_name, "Channel 2");
         });
     await request("http://localhost:9090")
         .put("/channel-name?id=1&name=Some_Name")
         .expect("Content-Type", /json/)
         .expect(200)
         .then((response) => {
-            assert(response.body.channel_name, "Some_Name")
+            assert(response.body.channel_name, "Some_Name");
         });
     await request("http://localhost:9090")
         .put("/channel-name?id=2&name=Keyboard")
         .expect("Content-Type", /json/)
         .expect(200)
         .then((response) => {
-            assert(response.body.channel_name, "Keyboard")
+            assert(response.body.channel_name, "Keyboard");
         });
     await request("http://localhost:9090")
         .put("/channel-name?id=3&name=Guitar")
         .expect("Content-Type", /json/)
         .expect(200)
         .then((response) => {
-            assert(response.body.channel_name, "Guitar")
+            assert(response.body.channel_name, "Guitar");
         });
     await request("http://localhost:9090")
         .put("/channel-name?id=4&name=New_Channel")
         .expect("Content-Type", /json/)
         .expect(200)
         .then((response) => {
-            assert(response.body.channel_name, "New_Channel")
+            assert(response.body.channel_name, "New_Channel");
         });
     await request("http://localhost:9090")
         .put("/endpoint_dne")

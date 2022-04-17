@@ -42,9 +42,19 @@ function validChannelName(channel_name) {
     }
 }
 
+function sendUpdates(app, data) {
+    if (app.locals.ws_connection !== null) {
+        app.locals.ws_connection.send(JSON.stringify(data));
+    }
+    app.locals.sse.forEach((sse) => {
+        sse.send(JSON.stringify(data));
+    });
+}
+
 module.exports = { 
     validBpm,
     validBpmEnabled,
     validNumber,
-    validChannelName
+    validChannelName,
+    sendUpdates
 };

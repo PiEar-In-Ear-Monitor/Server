@@ -7,21 +7,21 @@ async function beforeTest(app) {
         .get("/bpm")
         .expect("Content-Type", /json/)
         .expect(200)
-        .then(response => {
+        .then((response) => {
             assert(response.body.error, "Server not initialized");
         });
     await request("http://localhost:9090")
         .get("/channel-name")
         .expect("Content-Type", /json/)
         .expect(200)
-        .then(response => {
+        .then((response) => {
             assert(response.body.error, "Server not initialized");
         });
     await request("http://localhost:9090")
         .get("/does-not-exist")
         .expect("Content-Type", /json/)
         .expect(200)
-        .then(response => {
+        .then((response) => {
             assert(response.body.error, "Server not initialized");
         });
 }
