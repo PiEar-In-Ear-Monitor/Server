@@ -33,7 +33,9 @@ namespace PiEar {
         auto stream = std::ifstream(view_path, std::ios::binary);
         auto out = std::string();
         auto buf = std::string(read_size, '\0');
-        while (stream.read(&buf[0], read_size)) out.append(buf, 0, stream.gcount());
+        while (stream.readsome(&buf[0], read_size)) {
+            out.append(buf, 0, stream.gcount());
+        }
         out.append(buf, 0, stream.gcount());
         stream.close();
         return out;
@@ -45,7 +47,6 @@ namespace PiEar {
         }
         nlohmann::json data = nlohmann::json::parse(*json);
         auto *channel_vector = new std::vector<channel*>();
-        int i = 0;
         for (const auto& channel : data[key]){
             auto *new_channel = new PiEar::channel(channel["pipewire_id"], channel["piear_id"], channel["channel_name"], channel["enabled"]);
             channel_vector->push_back(new_channel);
