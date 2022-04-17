@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const { validBpm, validBpmEnabled, validChannelName, validNumber } = require("../src/Response_Helpers");
-const assert = require('assert');
+const assert = require("assert");
 
 function testBpm() {
     assert(validBpm(null) == null);

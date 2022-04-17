@@ -1,7 +1,7 @@
 function validBpm(bpm) {
     try {
-        let final = parseInt(/^[0-9]{1,3}$/.exec(bpm)[0]);
-        return (final == NaN)? null : final;
+        let final = parseInt(/^[0-9]{1,3}$/.exec(bpm)[0], 10);
+        return (final === NaN)? null : final;
     } catch {
         return null;
     }
@@ -22,8 +22,8 @@ function validBpmEnabled(bpm_enabled) {
 
 function validNumber(number) {
     try {
-        let final = parseInt(/^[0-9]*$/.exec(number)[0]);
-        return ((typeof final == "number") && (final + "" != "NaN"))? final : null;
+        let final = parseInt(/^[0-9]*$/.exec(number)[0], 10);
+        return ((typeof final === "number") && (final + "" !== "NaN"))? final : null;
     } catch {
         return null;
     }
@@ -31,8 +31,8 @@ function validNumber(number) {
 
 function validChannelName(channel_name) {
     try {
-        let final = (channel_name == null) ? null : /^[0-9a-zA-Z_]{1,26}/.exec(channel_name)[0];
-        if (final == null || final.length == 0) {
+        let final = (channel_name === null) ? null : /^[0-9a-zA-Z_]{1,26}/.exec(channel_name)[0];
+        if (final === null || final.length === 0) {
             return null;
         } else {
             return (/[^0-9a-zA-Z_]/.test(channel_name)) ? null : final;

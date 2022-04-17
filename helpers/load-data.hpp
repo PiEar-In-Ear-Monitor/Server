@@ -45,7 +45,6 @@ namespace PiEar {
         }
         nlohmann::json data = nlohmann::json::parse(*json);
         auto *channel_vector = new std::vector<channel*>();
-        int i = 0;
         for (const auto& channel : data[key]){
             auto *new_channel = new PiEar::channel(channel["pipewire_id"], channel["piear_id"], channel["channel_name"], channel["enabled"]);
             channel_vector->push_back(new_channel);
