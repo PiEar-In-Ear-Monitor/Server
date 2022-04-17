@@ -60,7 +60,7 @@ function testChannelName() {
     assert(validChannelName("284 ") === null);
     assert(validChannelName("0123456789________________") === "0123456789________________");
     assert(validChannelName("abcdefghijklmnopqrstuvwxyz") === "abcdefghijklmnopqrstuvwxyz");
-    assert(validChannelName("abcdefghijklmnopqrstuvwxyz0123456789_") === "abcdefghijklmnopqrstuvwxyz");
+    assert(validChannelName("abcdefghijklmnopqrstuvwxyz0123456789_") === null);
 }
 
 function testValidators() {

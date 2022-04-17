@@ -12,6 +12,13 @@ async function afterSetup() {
             assert(response.body.bpm_enabled, "false");
         });
     await request("http://localhost:9090")
+        .put("/bpm")
+        .expect("Content-Type", /json/)
+        .expect(422)
+        .then((response) => {
+            assert(response.body.error, "expected a query, \"bpmEnabled\", or \"bpm\", to be a number");
+        });
+    await request("http://localhost:9090")
         .put("/bpm?bpm=200")
         .expect("Content-Type", /json/)
         .expect(200)

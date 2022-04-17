@@ -47,21 +47,16 @@ app.get("/channel-name", (req, res) => {
 });
 
 function putBpm(req, res) {
-    let enable = validBpmEnabled(req.query.bpmEnabled);
-    let bpm = validBpm(req.query.bpm);
-    let final = {};
-    if (enable === null && bpm === null) {
+    let final = {
+        bpm_enabled: validBpmEnabled(req.query.bpmEnabled),
+        bpm: validBpm(req.query.bpm)
+    };
+    if (final.bpm_enabled === null && final.bpm === null) {
         res.status(422).json({error: "expected a query, \"bpmEnabled\", or \"bpm\", to be a number"});
         return;
     }
-    if (enable !== null) {
-        app.locals.bpmEnabled = enable;
-        final.bpm_enabled = enable;
-    }
-    if (bpm !== null) {
-        app.locals.bpm = bpm;
-        final.bpm = bpm;
-    }
+    app.locals.bpmEnabled = (final.bpm_enabled === null) ? app.locals.bpmEnabled : final.bpm_enabled;;
+    app.locals.bpm = (final.bpm === null) ? app.locals.bpm : final.bpm;
     sendUpdates(app.locals.wsConnection, app.locals.sse, final);
     res.status(200).json(final);
 }
@@ -105,7 +100,7 @@ function handleWs(ws) {
         if (app.locals.bpm === -1) {
             try {
                 let json = JSON.parse(message.replace("\u0000", ""));
-                if (json.bpm !== null) {
+                if (typeof json.bpm !== 'undefined') {
                     app.locals.bpm = json.bpm;
                 } else {
                     app.locals.channels.push({piear_id: json.piear_id, channel_name:json.channel_name});

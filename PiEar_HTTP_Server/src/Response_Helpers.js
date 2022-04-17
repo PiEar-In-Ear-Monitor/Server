@@ -19,20 +19,16 @@ function validBpmEnabled(bpmEnabled) {
 
 function validNumber(number) {
     try {
-        let final = parseInt(/^[0-9]*$/.exec(number)[0], 10);
-        return ((typeof final === "number") && (!isNaN(final)))? final : null;
+        let final = parseInt(number, 10);
+        return ((typeof final === "number") && !isNaN(final) && (String(final) === number)) ? final : null;
     } catch {
         return null;
     }
 }
 
 function validChannelName(channelName) {
-    let final = (channelName === null) ? null : /^[0-9a-zA-Z_]{1,26}/.exec(channelName);
-    if (final === null || final[0].length === 0) {
-        return final;
-    } else {
-        return (/[^0-9a-zA-Z_]/.test(channelName)) ? null : final[0];
-    }
+    let final = (channelName === null) ? -1 : String(/^[0-9a-zA-Z_]{1,26}/.exec(channelName));
+    return (channelName === final) ? final : null ;
 }
 
 function sendUpdates(ws, sseArray, data) {
