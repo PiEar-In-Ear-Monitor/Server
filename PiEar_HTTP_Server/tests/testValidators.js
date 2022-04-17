@@ -10,13 +10,13 @@ function testBpm() {
     assert(validBpm("2 Numbers Involved 1") === null);
     assert(validBpm("284 ") === null);
     for (let i = 0; i < 1000; i++) {
-        assert(validBpm(i + "") === i);        
+        assert(validBpm(String(i)) === i);        
     }
     for (let i = 1000; i < 10000; i++) {
-        assert(validBpm(i + "") === null);
+        assert(validBpm(String(i)) === null);
     }
     for (let i = -1; i > -10000; i--) {
-        assert(validBpm(i + "") === null);
+        assert(validBpm(String(i)) === null);
     }
 }
 
@@ -43,10 +43,10 @@ function testNumber() {
     assert(validNumber("2 Numbers Involved 1") === null);
     assert(validNumber("284 ") === null);
     for (let i = 0; i < 10000; i++) {
-        assert(validNumber(i + "") === i);        
+        assert(validNumber(String(i)) === i);        
     }
     for (let i = -1; i > -10000; i--) {
-        assert(validBpm(i + "") === null);
+        assert(validBpm(String(i)) === null);
     }
 }
 

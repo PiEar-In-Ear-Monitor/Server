@@ -19,8 +19,8 @@ function validBpmEnabled(bpmEnabled) {
 
 function validNumber(number) {
     try {
-        let final = parseInt(number, 10);
-        return ((typeof final === "number") && !isNaN(final) && (String(final) === number)) ? final : null;
+        let final = parseInt(/^[0-9]*$/.exec(number)[0], 10);
+        return (isNaN(final))? null : final;
     } catch {
         return null;
     }

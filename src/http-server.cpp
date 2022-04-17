@@ -54,6 +54,7 @@ namespace PiEar {
         std::thread kill_server_thread(kill_server_waiter, server_thread, kill_switch);
         while (!*kill_switch) {
             try {
+                stream_buffer.clear();
                 ws.read(stream_buffer);
             } catch(std::exception const& e) {}
             try {

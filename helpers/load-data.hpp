@@ -33,7 +33,9 @@ namespace PiEar {
         auto stream = std::ifstream(view_path, std::ios::binary);
         auto out = std::string();
         auto buf = std::string(read_size, '\0');
-        while (stream.read(&buf[0], read_size)) out.append(buf, 0, stream.gcount());
+        while (stream.readsome(&buf[0], read_size)) {
+            out.append(buf, 0, stream.gcount());
+        }
         out.append(buf, 0, stream.gcount());
         stream.close();
         return out;
