@@ -55,14 +55,13 @@ namespace PiEar {
         while (!*kill_switch) {
             try {
                 stream_buffer.clear();
-                ws.read(stream_buffer);
+                ws.read_some(stream_buffer, ws.read_message_max());
             } catch(std::exception const& e) {}
             try {
                 std::ostringstream os;
                 os << boost::beast::make_printable(stream_buffer.data());
                 std::string input_string = os.str();
                 nlohmann::json json_parsed = nlohmann::json::parse(input_string);
-                stream_buffer.clear();
                 if ((json_parsed)["piear_id"].empty()) {
                     if (!(json_parsed)["bpm"].empty()) {
                         *bpm =  (json_parsed)["bpm"];
