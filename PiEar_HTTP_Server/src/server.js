@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(cors());
 app.use(function(req, res, next) {
     res.header("WebServer", "PiEar-HTTP-Sever");
-    if (app.locals.bpm != -1 || req.url === "/abcdefghijklmnopqrstuvwxyz" || req.headers["shared-secret"] === app.locals.ws_secret) {
+    if (app.locals.bpm !== -1 || req.url === "/abcdefghijklmnopqrstuvwxyz" || req.headers["shared-secret"] === app.locals.wsSecret) {
         next();
     } else {
         res.status(200).json({error: "Server not initialized"});            
@@ -21,8 +21,8 @@ app.locals.bpm = -1;
 app.locals.bpmEnabled = "false";
 app.locals.channels = [];
 app.locals.sse = [];
-app.locals.ws_connection = null;
-app.locals.ws_secret = (process.argv.length === 3)? process.argv[2] : "";
+app.locals.wsConnection = null;
+app.locals.wsSecret = (process.argv.length === 3)? process.argv[2] : "";
 
 app.get("/bpm", (req, res) => {
     res.status(200).json({bpm: app.locals.bpm, bpm_enabled: app.locals.bpmEnabled});
@@ -54,15 +54,15 @@ function putBpm(req, res) {
         res.status(422).json({error: "expected a query, \"bpmEnabled\", or \"bpm\", to be a number"});
         return;
     }
-    if (enable != null) {
+    if (enable !== null) {
         app.locals.bpmEnabled = enable;
         final.bpm_enabled = enable;
     }
-    if (bpm != null) {
+    if (bpm !== null) {
         app.locals.bpm = bpm;
         final.bpm = bpm;
     }
-    sendUpdates(app, final);
+    sendUpdates(app.locals.wsConnection, app.locals.sse, final);
     res.status(200).json(final);
 }
 
@@ -74,19 +74,19 @@ function putChannelName(req, res) {
         res.status(422).json({error: "expected a query, \"id\", to be a number"});
         return;
     }
-    let new_name = validChannelName(req.query.name);
-    if (new_name === null) {
+    let newName = validChannelName(req.query.name);
+    if (newName === null) {
         res.status(422).json({error: "expected a query, \"name\", to consist of only numbers and letters."});
         return;
     }
     let final = app.locals.channels.filter((chan) => chan.piear_id === id);
-    if (final.length != 1) {
+    if (final.length !== 1) {
         res.status(422).json({error: `Cannot find channel with id ${id}`});
         return;
     }
-    final[0].channel_name = new_name;
-    sendUpdates(app, {piear_id: id, channel_name: new_name});
-    res.status(200).json({channel_name: new_name});
+    final[0].channel_name = newName;
+    sendUpdates(app.locals.wsConnection, app.locals.sse, {piear_id: id, channel_name: newName});
+    res.status(200).json({channel_name: newName});
 }
 
 
@@ -99,13 +99,13 @@ app.get("/abcdefghijklmnopqrstuvwxyz", (req, res) => {
 app.listen(9090);
 
 function handleWs(ws) {
-    app.locals.ws_connection = ws;
+    app.locals.wsConnection = ws;
     ws.on("message", (msg) => {
         let message = msg.toString();
         if (app.locals.bpm === -1) {
             try {
                 let json = JSON.parse(message.replace("\u0000", ""));
-                if (json.bpm != null) {
+                if (json.bpm !== null) {
                     app.locals.bpm = json.bpm;
                 } else {
                     app.locals.channels.push({piear_id: json.piear_id, channel_name:json.channel_name});
@@ -116,7 +116,7 @@ function handleWs(ws) {
         }
     });
     ws.on("close", () => {
-        app.locals.ws_connection = null;
+        app.locals.wsConnection = null;
     });
 }
 
@@ -132,7 +132,7 @@ app.get("/channel-name/listen", (req, res) => {
     });
     res.flushHeaders();
     app.locals.sse.push(res);
-    res.on("close", () => {app.locals.sse = app.locals.sse.filter((sse) => sse != res);});
+    res.on("close", () => {app.locals.sse = app.locals.sse.filter((sse) => sse !== res);});
 });
 
 module.exports = { app };
