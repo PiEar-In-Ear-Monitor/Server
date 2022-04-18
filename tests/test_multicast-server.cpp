@@ -15,9 +15,35 @@
 
 #include "gtest/gtest.h"
 #include "multicast-server.h"
+#include "channel.hpp"
+#include <boost/asio.hpp>
+#include <thread>
+#include <atomic>
+#include <vector>
 
 TEST(testPiEar, multicast_server)
 {
+    std::atomic<bool> done(false);
+    std::vector<PiEar::channel> channels;
+    channels.push_back(PiEar::channel(0, 1, "Channel 1", true);
+    std::thread multicast_server_thread(PiEar::mainloop_multicast_server, );
+    // Receive multicast packets
+    boost::asio::io_service io_service;
+    boost::asio::ip::udp::endpoint multicast_endpoint(boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP), MULTICAST_SERVER_PORT);
+    boost::asio::ip::udp::socket socket(io_service, multicast_endpoint.protocol());
+    socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+    socket.set_option(boost::asio::ip::multicast::join_group(multicast_endpoint.address()));
+    socket.set_option(boost::asio::ip::multicast::enable_loopback(true));
+    socket.bind(multicast_endpoint);
+
+    // Read message
+    char buffer[1024];
+    std::size_t len = socket.receive(boost::asio::buffer(buffer));
+    std::string message(buffer, len);
+
+    // Check message
+    EXPECT_EQ(message, "Hello World!");
+
     PiEar::mainloop_multicast_server();
     EXPECT_EQ(1000, 1000);
 }

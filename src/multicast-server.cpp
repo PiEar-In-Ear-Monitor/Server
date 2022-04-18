@@ -7,6 +7,17 @@
 #include "boost/date_time/posix_time/posix_time_types.hpp"
 
 namespace PiEar {
+    void mainloop_multicast_server(int *audio_streams, bool *click_stream, bool *end)
+    {
+        boost::asio::io_context io_context;
+        boost::asio::ip::udp::endpoint endpoint(boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP), MULTICAST_SERVER_PORT);
+        boost::asio::ip::udp::socket socket(io_context, endpoint.protocol());
+        socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+        socket.set_option(boost::asio::ip::multicast::join_group(endpoint.address()));
+        socket.set_option(boost::asio::ip::multicast::enable_loopback(false));
+        socket.set_option(boost::asio::ip::multicast::hops(1));
+        socket.set_option(boost::asio::socket_base::broadcast(true));
+        socket.bind(endpoint);
 
     const int max_message_count = 10;
 
