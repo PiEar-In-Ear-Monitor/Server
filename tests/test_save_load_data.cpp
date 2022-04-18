@@ -7,20 +7,22 @@
 #include <thread>
 #include <filesystem>
 #include <iostream>
-#include <boost/filesystem.hpp>
+#include <cstdio>
 
-std::vector<PiEar::channel*> *load_from_file(const boost::filesystem::path& path) {
-    std::string data = PiEar::get_file_contents(path.string());
+#define DIRECTORY_SEPARATOR "/"
+std::vector<PiEar::channel*> *load_from_file(const std::string& path) {
+    std::string data = PiEar::get_file_contents(path);
     std::string key = "channels";
     return PiEar::process_array(&data, key);
 }
 
 TEST(testPiEar, task_load) {
-    auto cha = generate_channels(3);
-    boost::filesystem::path full_path = boost::filesystem::path(std::filesystem::temp_directory_path()) / "piear_test_save_load.json";
-    auto task = PiEar::task(cha, full_path.string(), 1);
+    auto cha = generate_channels(3); // std::tmpnam(nullptr);
+//    boost::filesystem::path full_path = boost::filesystem::path(std::filesystem::temp_directory_path()) / "piear_test_save_load.json";
+    std::string full_path = std::filesystem::temp_directory_path().string() + DIRECTORY_SEPARATOR + "piear_test_save_load.json";
+    auto task = PiEar::task(cha, full_path, 1);
     task.async_run_save_task();
-    while (!std::filesystem::exists(full_path.string())) std::this_thread::yield();
+    while (!std::filesystem::exists(full_path)) std::this_thread::yield();
     sleep(1);
     auto data = load_from_file(full_path);
     ASSERT_EQ(cha->size(), data->size());

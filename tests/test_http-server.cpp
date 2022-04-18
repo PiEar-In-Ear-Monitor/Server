@@ -25,7 +25,7 @@ TEST(testPiEar, http_server) {
     // Run command and wait for it to finish
     int status;
     waitpid(node_thread, &status, 0);
-    sleep(2); // Enough time to manually send requests with Insomnia
+    sleep(2); // Wait for server to initialize
     node_thread = fork();
     if (!node_thread) {
         std::vector<char*> server_args;
@@ -35,10 +35,20 @@ TEST(testPiEar, http_server) {
         execve("../PiEar_HTTP_Server/tests/afterSetup.js", &command[0], nullptr);
         return; // Redundant
     }
-    waitpid(node_thread, 0, 0);
+    waitpid(node_thread, nullptr, 0);
+    node_thread = fork();
+    if (!node_thread) {
+        std::vector<char*> server_args;
+        server_args.push_back(const_cast<char*>("testValidators.js"));
+        server_args.push_back(nullptr);
+        char **command = server_args.data();
+        execve("../PiEar_HTTP_Server/tests/testValidators.js", &command[0], nullptr);
+        return; // Redundant
+    }
+    waitpid(node_thread, nullptr, 0);
+//    while(true);
     kill = true;
     server.join();
-    EXPECT_EQ((*channels)[0]->channel_name, "Channel 0");
     EXPECT_EQ((*channels)[1]->channel_name, "Some_Name");
     EXPECT_EQ((*channels)[2]->channel_name, "Keyboard");
     EXPECT_EQ((*channels)[3]->channel_name, "Guitar");
