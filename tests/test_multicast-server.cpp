@@ -24,12 +24,17 @@
 TEST(testPiEar, multicast_server)
 {
     // For right now, send data
-//    PiEar::mainloop_multicast_server();
+    // Create pointer to std::vector<PiEar::channel*>
+    // Create pointer to std::vector<std::thread>
 
-//    std::atomic<bool> done(false);
-//    std::vector<PiEar::channel> channels;
-//    channels.push_back(PiEar::channel(0, 1, "Channel 1", true);
-//    std::thread multicast_server_thread(PiEar::mainloop_multicast_server, );
+    std::vector<PiEar::channel*> channels;
+    channels.push_back(new PiEar::channel(0, 1, "Channel 1", true));
+    std::atomic<bool> click = false;
+    std::atomic<bool> kill = false;
+    std::thread multicastThread(PiEar::mainloop_multicast_server, &channels, &click, &kill);
+    sleep(5);
+    click = true;
+    multicastThread.join();
 //    // Receive multicast packets
 //    boost::asio::io_service io_service;
 //    boost::asio::ip::udp::endpoint multicast_endpoint(boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP), MULTICAST_SERVER_PORT);
