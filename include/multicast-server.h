@@ -15,6 +15,12 @@
 
 #ifndef PIEAR_SERVER_MULTICAST_SERVER_H
 #define PIEAR_SERVER_MULTICAST_SERVER_H
+
+#include <boost/system/error_code.hpp>
+#include <boost/asio/ip/udp.hpp>
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/io_service.hpp>
+
 #define MUTLICAST_SERVER_H_VERSION_MAJOR 1
 #define MUTLICAST_SERVER_H_VERSION_MINOR 0
 #define MULTICAST_SERVER_PORT 9090
@@ -29,8 +35,20 @@ namespace PiEar {
      * @param click_stream  Pointer to the click's stream
      * @param end Pointer to a bool that, when set to false, will kill the server
      */
-    void mainloop_multicast_server();
+    void mainloop_multicast_server(int*, bool*, bool*);
 
+    class MulticastServer {
+    public:
+        MulticastServer(boost::asio::io_service&, const boost::asio::ip::address&);
+        void handle_timeout(const boost::system::error_code&);
+        void handle_send_to(const boost::system::error_code&);
+    private:
+        boost::asio::ip::udp::endpoint endpoint_;
+        boost::asio::ip::udp::socket socket_;
+        boost::asio::deadline_timer timer_;
+        int message_count_;
+        std::string message_;
+    };
     /**
      * Creates the Multicast server
      *
@@ -56,6 +74,7 @@ namespace PiEar {
      * @return Success
      */
     bool send_data(void *socket, unsigned char *data);
+
 }
 
 #endif //PIEAR_SERVER_MULTICAST_SERVER_H
