@@ -44,7 +44,7 @@ namespace PiEar {
         if (!error && !*kill_server) {
             timer_.expires_from_now(boost::posix_time::seconds(1));
             timer_.async_wait( boost::bind(&MulticastServer::handle_timeout, this, boost::asio::placeholders::error));
-//            boost::bind(&MulticastServer::handle_timeout, this, boost::asio::placeholders::error);
+//            handle_timeout(boost::system::error_code());
         }
     }
 
