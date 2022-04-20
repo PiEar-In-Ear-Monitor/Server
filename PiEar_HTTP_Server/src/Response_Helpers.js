@@ -36,7 +36,7 @@ function sendUpdates(ws, sseArray, data) {
         ws.send(JSON.stringify(data));
     }
     sseArray.forEach((sse) => {
-        sse.send(JSON.stringify(data));
+        sse.write(`data: ${JSON.stringify(data)}\n\n`);
     });
 }
 
