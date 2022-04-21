@@ -6,6 +6,9 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/copy.hpp>
 
 namespace PiEar {
     void mainloop_multicast_server(std::vector<channel*> *audio_streams, std::atomic<bool> *click_stream, std::atomic<bool> *end)
@@ -15,8 +18,6 @@ namespace PiEar {
         boost::asio::ip::udp::socket socket(io_context, endpoint.protocol());
         socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
         socket.set_option(boost::asio::ip::multicast::join_group(endpoint.address()));
-//        socket.set_option(boost::asio::ip::multicast::enable_loopback(false));
-//        socket.set_option(boost::asio::ip::multicast::hops(1));
         socket.set_option(boost::asio::socket_base::broadcast(true));
         socket.bind(endpoint);
 
@@ -34,10 +35,7 @@ namespace PiEar {
 
     PiEar::MulticastServer::MulticastServer(boost::asio::io_service& io_service, const boost::asio::ip::address& multicast_address, std::atomic<bool> *kill):
         endpoint_(multicast_address, 6666), socket_(io_service, endpoint_.protocol()), timer_(io_service), message_count_(0), kill_server(kill) {
-        std::ostringstream os;
-        os << "Message " << message_count_++;
-        message_ = os.str();
-        socket_.async_send_to( boost::asio::buffer(message_), endpoint_, boost::bind(&MulticastServer::handle_send_to, this,boost::asio::placeholders::error));
+        handle_timeout(boost::system::error_code());
     }
 
     void PiEar::MulticastServer::handle_send_to(const boost::system::error_code& error) {
@@ -53,7 +51,24 @@ namespace PiEar {
             std::ostringstream os;
             os << "Message " << message_count_++;
             message_ = os.str();
-            socket_.async_send_to( boost::asio::buffer(message_), endpoint_, boost::bind(&MulticastServer::handle_send_to, this, boost::asio::placeholders::error));
+//            socket_.send_to(boost::asio::buffer(message_), endpoint_);
+            socket_.send_to(boost::asio::buffer(compress(&message_)), endpoint_);
+            handle_send_to(boost::system::error_code());
+        } else {
+            std::cerr << "Error: " << error.message() << "\n";
+            handle_send_to(boost::system::error_code());
         }
+    }
+
+    std::string PiEar::MulticastServer::compress(std::string *stream) {
+        boost::iostreams::filtering_streambuf<boost::iostreams::input> in;
+        in.push(boost::iostreams::gzip_compressor());
+        std::istringstream uncompressed_string(*stream);
+        in.push(uncompressed_string);
+        std::ostringstream compressed_string;
+        boost::iostreams::copy(in, compressed_string);
+        std::string final = compressed_string.str();
+        std::cout << "Compressing " << *stream << " to " << final << std::endl;
+        return final;
     }
 }

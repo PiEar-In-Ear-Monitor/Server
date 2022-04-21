@@ -16,7 +16,6 @@
 #include "multicast-server.h"
 #include "http-server.h"
 #include "channel.hpp"
-#include "http-server.h"
 #include "click.h"
 #include "audio.h"
 #include <thread>
@@ -38,7 +37,7 @@ std::string random_string(std::size_t length)
 
 int main(int argc, char *argv[]) {
     // Click
-    std::atomic<bool> click = false, kill_click = false, kill_http = false;
+    std::atomic<bool> click = false, kill_click = false, kill_http = false, kill_multicast = false;
     std::atomic<int> cpm = 100;
     std::thread click_thread(PiEar::mainloop_click, &cpm, &click, &kill_click);
     int number_of_audio_channels = 11;
@@ -47,10 +46,13 @@ int main(int argc, char *argv[]) {
         channels.push_back(new PiEar::channel(i, i, "channel_" + std::to_string(i), true));
     }
     std::thread webserver_thread(PiEar::mainloop_http_server, &kill_http, &channels, &cpm, random_string(20), 1);
+    std::thread multicast_thread(PiEar::mainloop_multicast_server, &channels, &click, &kill_multicast);
     std::cout << "Press any key to exit..." << std::endl;
     std::cin.get();
     kill_click = true;
     kill_http = true;
+    kill_multicast = true;
     click_thread.join();
     webserver_thread.join();
+    multicast_thread.join();
 }

@@ -25,7 +25,7 @@
 #define MUTLICAST_SERVER_H_VERSION_MAJOR 1
 #define MUTLICAST_SERVER_H_VERSION_MINOR 0
 #define MULTICAST_SERVER_PORT 6666
-#define MULTICAST_SERVER_GROUP "224.0.0.128"
+#define MULTICAST_SERVER_GROUP "224.0.0.69"
 
 namespace PiEar {
     /**
@@ -41,9 +41,10 @@ namespace PiEar {
     class MulticastServer {
     public:
         MulticastServer(boost::asio::io_service&, const boost::asio::ip::address&, std::atomic<bool>*);
+    private:
         void handle_timeout(const boost::system::error_code&);
         void handle_send_to(const boost::system::error_code&);
-    private:
+        std::string compress(std::string*);
         std::atomic<bool>* kill_server;
         boost::asio::ip::udp::endpoint endpoint_;
         boost::asio::ip::udp::socket socket_;
