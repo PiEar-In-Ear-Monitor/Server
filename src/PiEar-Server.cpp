@@ -18,12 +18,12 @@
 #include "channel.hpp"
 #include "click.h"
 #include "audio.h"
+#include "queue.hpp"
 #include <thread>
 #include <atomic>
 #include <iostream>
 
-std::string random_string(std::size_t length)
-{
+std::string random_string(std::size_t length) {
     const std::string CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     std::random_device random_device;
     std::mt19937 generator(random_device());
@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
     // Click
     std::atomic<bool> click = false, kill_click = false, kill_http = false, kill_multicast = false;
     std::atomic<int> cpm = 100;
+    queue<uint16_t*> audio_queue;
     std::thread click_thread(PiEar::mainloop_click, &cpm, &click, &kill_click);
     int number_of_audio_channels = 11;
     std::vector<PiEar::channel*> channels;
