@@ -41,10 +41,10 @@ namespace PiEar {
     class MulticastServer {
     public:
         MulticastServer(boost::asio::io_service&, const boost::asio::ip::address&, std::atomic<bool>*);
+        static std::string compress(std::string*);
     private:
         void handle_timeout(const boost::system::error_code&);
         void handle_send_to(const boost::system::error_code&);
-        std::string compress(std::string*);
         std::atomic<bool>* kill_server;
         boost::asio::ip::udp::endpoint endpoint_;
         boost::asio::ip::udp::socket socket_;

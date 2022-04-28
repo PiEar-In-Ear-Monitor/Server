@@ -51,7 +51,6 @@ namespace PiEar {
             std::ostringstream os;
             os << "Message " << message_count_++;
             message_ = os.str();
-//            socket_.send_to(boost::asio::buffer(message_), endpoint_);
             socket_.send_to(boost::asio::buffer(compress(&message_)), endpoint_);
             handle_send_to(boost::system::error_code());
         } else {
@@ -67,8 +66,6 @@ namespace PiEar {
         in.push(uncompressed_string);
         std::ostringstream compressed_string;
         boost::iostreams::copy(in, compressed_string);
-        std::string final = compressed_string.str();
-        std::cout << "Compressing " << *stream << " to " << final << std::endl;
-        return final;
+        return compressed_string.str();
     }
 }
