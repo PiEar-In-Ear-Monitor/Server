@@ -49,9 +49,11 @@ app.get("/channel-name", (req, res) => {
 function formPutBpmResponse(bpm, enabled) {
     let final = {};
     if (enabled !== null) {
+        app.locals.bpmEnabled = enabled;
         final.bpm_enabled = enabled;
     }
     if (bpm !== null) {
+        app.locals.bpm = bpm;
         final.bpm = bpm;
     }
     return final;
