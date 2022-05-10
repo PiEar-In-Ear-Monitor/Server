@@ -13,7 +13,6 @@ app.use(function(req, res, next) {
         next();
     } else {
         res.status(200).json({error: "Server not initialized"});            
-        return;
     }
 });
 
