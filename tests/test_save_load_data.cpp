@@ -24,23 +24,20 @@ TEST(testPiEar, task_load) {
     sleep(1);
     auto data = load_from_file(full_path);
     ASSERT_EQ(cha->size(), data->size());
-    auto initial_count = cha->size();
-    for (unsigned i = 0; i < cha->size(); i++) {
-        ASSERT_EQ(cha->at(i)->pipewire_id, data->at(i)->pipewire_id);
-        ASSERT_EQ(cha->at(i)->piear_id, data->at(i)->piear_id);
-        ASSERT_EQ(cha->at(i)->channel_name, data->at(i)->channel_name);
-        ASSERT_EQ(cha->at(i)->enabled, data->at(i)->enabled);
-    }
-    generate_channels(2, cha);
-    sleep(2);
-    data = load_from_file(full_path);
-    ASSERT_EQ(cha->size(), data->size());
-    ASSERT_NE(initial_count, cha->size());
-    for (unsigned i = 0; i < cha->size(); i++) {
-        ASSERT_EQ(cha->at(i)->pipewire_id, data->at(i)->pipewire_id);
-        ASSERT_EQ(cha->at(i)->piear_id, data->at(i)->piear_id);
-        ASSERT_EQ(cha->at(i)->channel_name, data->at(i)->channel_name);
-        ASSERT_EQ(cha->at(i)->enabled, data->at(i)->enabled);
+    for (int _ = 0; _ < 2; _++) {
+        ASSERT_EQ(cha->size(), data->size());
+        for (unsigned i = 0; i < cha->size(); i++) {
+            ASSERT_EQ(cha->at(i)->pipewire_id, data->at(i)->pipewire_id);
+            ASSERT_EQ(cha->at(i)->piear_id, data->at(i)->piear_id);
+            ASSERT_EQ(cha->at(i)->channel_name, data->at(i)->channel_name);
+            ASSERT_EQ(cha->at(i)->enabled, data->at(i)->enabled);
+        }
+        if (_ == 1) {
+            break;
+        }
+        generate_channels(2, cha);
+        sleep(2);
+        data = load_from_file(full_path);
     }
     task.async_stop_save_task();
     remove(full_path.c_str());

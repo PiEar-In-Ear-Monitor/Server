@@ -123,7 +123,9 @@ function handleWs(ws) {
 }
 
 app.ws("/", (ws, req) => {
-    handleWs(ws);
+    if (req !== null) {
+        handleWs(ws);
+    }
 });
 
 app.get("/channel-name/listen", (req, res) => {
