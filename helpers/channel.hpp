@@ -12,10 +12,19 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#include <boost/beast/core/detail/base64.hpp>
 
 namespace PiEar {
     class channel {
     private:
+        static std::string base64_encode(boost::beast::string_view s) {
+            std::uint8_t const* data = reinterpret_cast < std::uint8_t const*> (s.data());
+            std::size_t len = s.size();
+            std::string dest;
+            dest.resize(boost::beast::detail::base64::encoded_size(len));
+            dest.resize(boost::beast::detail::base64::encode(&dest[0], data, len));
+            return dest;
+        }
     public:
         int pipewire_id;            //!< ID of channel in pipewire
         int piear_id;               //!< ID of channel in piear
@@ -27,8 +36,8 @@ namespace PiEar {
          * @param std::string channel name
          * @param bool enabled
          */
-        channel(int pw_id, int pe_id, std::string c_name, bool en) :
-                pipewire_id(pw_id), piear_id(pe_id), channel_name(std::move(c_name)), enabled(en) {}
+        channel(int pw_id, int pe_id, const std::string& c_name, bool en) :
+                pipewire_id(pw_id), piear_id(pe_id), channel_name(base64_encode(c_name)), enabled(en) {}
         /**
          * The default `std::string` conversion is to
          * a JSON object

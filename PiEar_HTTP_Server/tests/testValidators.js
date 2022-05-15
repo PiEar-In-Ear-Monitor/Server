@@ -53,14 +53,14 @@ function testNumber() {
 function testChannelName() {
     assert(validChannelName(null) === null);
     assert(validChannelName("") === null);
-    assert(validChannelName("Some Spaces") === null);
-    assert(validChannelName("Some") === "Some");
-    assert(validChannelName("String") === "String");
-    assert(validChannelName("2_Numbers_Involved_1") === "2_Numbers_Involved_1");
-    assert(validChannelName("284 ") === null);
-    assert(validChannelName("0123456789________________") === "0123456789________________");
-    assert(validChannelName("abcdefghijklmnopqrstuvwxyz") === "abcdefghijklmnopqrstuvwxyz");
-    assert(validChannelName("abcdefghijklmnopqrstuvwxyz0123456789_") === null);
+    assert(validChannelName(Buffer.from("Some").toString('base64')) === Buffer.from("Some").toString('base64'));
+    assert(validChannelName(Buffer.from("Some Spaces").toString('base64')) === Buffer.from("Some Spaces").toString('base64'));
+    assert(validChannelName(Buffer.from("String").toString('base64')) === Buffer.from("String").toString('base64'));
+    assert(validChannelName(Buffer.from("2_Numbers_Involved_1").toString('base64')) === Buffer.from("2_Numbers_Involved_1").toString('base64'));
+    assert(validChannelName(Buffer.from("284 ").toString('base64')) === Buffer.from("284 ").toString('base64'));
+    assert(validChannelName(Buffer.from("0123456789________________").toString('base64')) === Buffer.from("0123456789________________").toString('base64'));
+    assert(validChannelName(Buffer.from("abcdefghijklmnopqrstuvwxyz").toString('base64')) === Buffer.from("abcdefghijklmnopqrstuvwxyz").toString('base64'));
+    assert(validChannelName(Buffer.from("abcdefghijklmnopqrstuvwxyz0123456789_").toString('base64')) === Buffer.from("abcdefghijklmnopqrstuvwxyz0123456789_").toString('base64'));
 }
 
 function testValidators() {

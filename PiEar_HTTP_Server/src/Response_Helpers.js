@@ -27,7 +27,7 @@ function validNumber(number) {
 }
 
 function validChannelName(channelName) {
-    let final = (channelName === null) ? -1 : String(/^[0-9a-zA-Z_]{1,26}/.exec(channelName));
+    let final = (channelName === null) ? null : String(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/.exec(channelName));
     return (channelName === final) ? final : null ;
 }
 
@@ -36,7 +36,7 @@ function sendUpdates(ws, sseArray, data) {
         ws.send(JSON.stringify(data));
     }
     sseArray.forEach((sse) => {
-        sse.send(JSON.stringify(data));
+        sse.write(`data: ${JSON.stringify(data)}\n\n`);
     });
 }
 
