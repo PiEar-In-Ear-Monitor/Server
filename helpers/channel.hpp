@@ -17,6 +17,7 @@
 namespace PiEar {
     class channel {
     private:
+    public:
         static std::string base64_encode(boost::beast::string_view s) {
             std::uint8_t const* data = reinterpret_cast < std::uint8_t const*> (s.data());
             std::size_t len = s.size();
@@ -25,7 +26,6 @@ namespace PiEar {
             dest.resize(boost::beast::detail::base64::encode(&dest[0], data, len));
             return dest;
         }
-    public:
         int pipewire_id;            //!< ID of channel in pipewire
         int piear_id;               //!< ID of channel in piear
         std::string channel_name;   //!< Channel name
