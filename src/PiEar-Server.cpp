@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     int number_of_audio_channels = 11;
     std::vector<PiEar::channel*> channels;
     for (int i = 0; i < number_of_audio_channels; i++) {
-        channels.push_back(new PiEar::channel(i, i, "channel_" + std::to_string(i), true));
+        channels.push_back(new PiEar::channel(i, i, "Channel " + std::to_string(i), true));
     }
     std::thread webserver_thread(PiEar::mainloop_http_server, &kill_http, &channels, &cpm, random_string(20), 1);
     std::thread multicast_thread(PiEar::mainloop_multicast_server, &channels, &click, &kill_multicast);

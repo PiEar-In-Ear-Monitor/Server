@@ -55,7 +55,8 @@ namespace PiEar::Test {
         void handle_receive_from(const boost::system::error_code &error, size_t bytes_recvd) {
             if (!error && !(*kill)) {
                 std::string message(data_, bytes_recvd);
-                EXPECT_EQ(message, expectedMessages.back());
+                std::string expected = PiEar::MulticastServer::compress(&expectedMessages.back());
+                EXPECT_EQ(message, expected);
                 expectedMessages.pop_back();
 
                 socket_.async_receive_from(

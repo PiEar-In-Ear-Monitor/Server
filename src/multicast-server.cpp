@@ -34,7 +34,7 @@ namespace PiEar {
     }
 
     PiEar::MulticastServer::MulticastServer(boost::asio::io_service& io_service, const boost::asio::ip::address& multicast_address, std::atomic<bool> *kill):
-        endpoint_(multicast_address, 6666), socket_(io_service, endpoint_.protocol()), timer_(io_service), message_count_(0), kill_server(kill) {
+        endpoint_(multicast_address, MULTICAST_SERVER_PORT), socket_(io_service, endpoint_.protocol()), timer_(io_service), message_count_(0), kill_server(kill) {
         handle_timeout(boost::system::error_code());
     }
 
