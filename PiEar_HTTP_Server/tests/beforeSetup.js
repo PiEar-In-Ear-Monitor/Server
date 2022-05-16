@@ -2,7 +2,7 @@
 const request = require("supertest");
 const assert = require("assert");
 
-async function beforeTest(app) {
+async function beforeTest() {
     await request("http://localhost:9090")
         .get("/bpm")
         .expect("Content-Type", /json/)

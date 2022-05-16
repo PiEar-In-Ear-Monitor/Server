@@ -13,7 +13,6 @@ app.use(function(req, res, next) {
         next();
     } else {
         res.status(200).json({error: "Server not initialized"});            
-        return;
     }
 });
 
@@ -124,7 +123,9 @@ function handleWs(ws) {
 }
 
 app.ws("/", (ws, req) => {
-    handleWs(ws);
+    if (req !== null) {
+        handleWs(ws);
+    }
 });
 
 app.get("/channel-name/listen", (req, res) => {

@@ -7,7 +7,7 @@ include_directories(include)
 include_directories(helpers)
 file(GLOB SOURCES "src/*.cpp")
 add_executable(PiEar ${SOURCES})
-target_link_libraries(PiEar pthread boost_filesystem boost_system portaudio)
+target_link_libraries(PiEar pthread boost_filesystem boost_system boost_iostreams portaudio)
 
 if(PACKAGE_TESTS)
     enable_testing()
@@ -24,7 +24,7 @@ if(PACKAGE_TESTS)
     target_link_libraries(Channel_Test gtest gtest_main pthread)
 
     package_add_test(Multicast_Test src/multicast-server.cpp tests/test_multicast-server.cpp)
-    target_link_libraries(Multicast_Test gtest gtest_main pthread boost_system boost_iostreams)
+    target_link_libraries(Multicast_Test gtest gtest_main pthread boost_system boost_filesystem boost_iostreams)
 
     package_add_test(Audio_Test src/audio.cpp tests/test_audio.cpp)
     target_link_libraries(Audio_Test gtest gtest_main pthread portaudio)
