@@ -21,7 +21,7 @@ function validNumber(number) {
     try {
         let final = parseInt(/^\d*$/.exec(number)[0], 10);
         return (isNaN(final))? null : final;
-    } catch {
+    } catch (e){
         return null;
     }
 }

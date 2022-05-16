@@ -1,5 +1,5 @@
-[![Master CMake](https://img.shields.io/github/workflow/status/AlexOConnorHub/PiEar-Server/Master%20CMake/master)](https://github.com/PiEar-In-Ear-Monitor/Server/actions/workflows/cmake.yml)
-[![Develop CMake](https://img.shields.io/github/workflow/status/AlexOConnorHub/PiEar-Server/Develop%20CMake/develop)](https://github.com/PiEar-In-Ear-Monitor/Server/actions/workflows/dev_cmake.yml)
+[![Master CMake](https://img.shields.io/github/workflow/status/PiEar-In-Ear-Monitor/Server/Master%20CMake/master)](https://github.com/PiEar-In-Ear-Monitor/Server/actions/workflows/cmake.yml)
+[![Develop CMake](https://img.shields.io/github/workflow/status/PiEar-In-Ear-Monitor/Server/Develop%20CMake/develop)](https://github.com/PiEar-In-Ear-Monitor/Server/actions/workflows/dev_cmake.yml)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/24545/badge.svg)](https://scan.coverity.com/projects/alexoconnorhub-piear-server)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c0f4a2a487784594957110955b7cdff1)](https://www.codacy.com/gh/PiEar-In-Ear-Monitor/Server/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=PiEar-In-Ear-Monitor/Server&amp;utm_campaign=Badge_Grade)[![GitHub Releases](https://img.shields.io/github/v/release/PiEar-In-Ear-Monitor/Server.svg)](https://github.com/PiEar-In-Ear-Monitor/Server/releases)
 [![GitHub Issues](https://img.shields.io/github/issues/PiEar-In-Ear-Monitor/Server.svg)](https://github.com/PiEar-In-Ear-Monitor/Server/issues)
