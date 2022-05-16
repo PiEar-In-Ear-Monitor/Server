@@ -36,10 +36,10 @@ TEST(testPiEar, channel_int_test) {
 TEST(testPiEar, channel_string_test) {
     PiEar::channel to_test(1, 1, std::string("Hello World"), true);
     EXPECT_EQ(to_test, 1);
-    EXPECT_EQ((std::string)to_test, std::string("{\"pipewire_id\":1,\"piear_id\":1,\"channel_name\":\"Hello World\",\"enabled\":true}"));
+    EXPECT_EQ((std::string)to_test, std::string("{\"pipewire_id\":1,\"piear_id\":1,\"channel_name\":\"SGVsbG8gV29ybGQ=\",\"enabled\":true}"));
     to_test.pipewire_id = 2;
     to_test.piear_id = 4;
     to_test.enabled = false;
-    to_test.channel_name = std::string("New Name");
-    EXPECT_EQ((std::string)to_test, std::string("{\"pipewire_id\":2,\"piear_id\":4,\"channel_name\":\"New Name\",\"enabled\":false}"));
+    to_test.channel_name = std::string("TmV3IE5hbWU=");
+    EXPECT_EQ((std::string)to_test, std::string("{\"pipewire_id\":2,\"piear_id\":4,\"channel_name\":\"TmV3IE5hbWU=\",\"enabled\":false}"));
 }

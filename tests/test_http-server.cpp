@@ -5,7 +5,6 @@
 #include <atomic>
 #include <thread>
 #include <vector>
-#include <iostream>
 
 TEST(testPiEar, http_server) {
     std::atomic<bool> kill = false;
@@ -46,12 +45,12 @@ TEST(testPiEar, http_server) {
         return; // Redundant
     }
     waitpid(node_thread, nullptr, 0);
-//    while(true);
+//    while(true); // For manual testing
     kill = true;
     server.join();
-    EXPECT_EQ((*channels)[1]->channel_name, "Some_Name");
-    EXPECT_EQ((*channels)[2]->channel_name, "Keyboard");
-    EXPECT_EQ((*channels)[3]->channel_name, "Guitar");
-    EXPECT_EQ((*channels)[4]->channel_name, "New_Channel");
+    EXPECT_EQ((*channels)[1]->channel_name, "U29tZV9OYW1l"); // Some_Name
+    EXPECT_EQ((*channels)[2]->channel_name, "S2V5Ym9hcmQ="); // Keyboard
+    EXPECT_EQ((*channels)[3]->channel_name, "R3VpdGFy"); // Guitar
+    EXPECT_EQ((*channels)[4]->channel_name, "TmV3X0NoYW5uZWw="); // New_Channel
     EXPECT_EQ(bpm, 200);
 }

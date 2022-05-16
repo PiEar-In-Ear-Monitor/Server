@@ -13,7 +13,6 @@ app.use(function(req, res, next) {
         next();
     } else {
         res.status(200).json({error: "Server not initialized"});            
-        return;
     }
 });
 
@@ -49,9 +48,11 @@ app.get("/channel-name", (req, res) => {
 function formPutBpmResponse(bpm, enabled) {
     let final = {};
     if (enabled !== null) {
+        app.locals.bpmEnabled = enabled;
         final.bpm_enabled = enabled;
     }
     if (bpm !== null) {
+        app.locals.bpm = bpm;
         final.bpm = bpm;
     }
     return final;
@@ -122,7 +123,9 @@ function handleWs(ws) {
 }
 
 app.ws("/", (ws, req) => {
-    handleWs(ws);
+    if (req !== null) {
+        handleWs(ws);
+    }
 });
 
 app.get("/channel-name/listen", (req, res) => {
