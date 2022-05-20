@@ -16,12 +16,12 @@
 #ifndef PIEAR_SERVER_LOAD_DATA_HPP
 #define PIEAR_SERVER_LOAD_DATA_HPP
 
-#include "channel.hpp"
-#include <utility>
-#include <vector>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <utility>
+#include <vector>
+#include "channel.hpp"
 
 namespace PiEar {
     std::string get_file_contents(const std::string&);
@@ -48,7 +48,7 @@ namespace PiEar {
         nlohmann::json data = nlohmann::json::parse(*json);
         auto *channel_vector = new std::vector<channel*>();
         for (const auto& channel : data[key]){
-            auto *new_channel = new PiEar::channel(channel["pipewire_id"], channel["piear_id"], "", channel["enabled"]);
+            auto *new_channel = new PiEar::channel(channel["piear_id"], "", channel["enabled"]);
             new_channel->channel_name = channel["channel_name"];
             channel_vector->push_back(new_channel);
         }

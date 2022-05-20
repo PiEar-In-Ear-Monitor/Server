@@ -16,10 +16,9 @@
 #ifndef PIEAR_SERVER_MULTICAST_SERVER_H
 #define PIEAR_SERVER_MULTICAST_SERVER_H
 
-#include <boost/system/error_code.hpp>
-#include <boost/asio/ip/udp.hpp>
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/buffer.hpp>
 #include <boost/asio/io_service.hpp>
+#include <boost/asio/ip/udp.hpp>
 #include "channel.hpp"
 
 #define MUTLICAST_SERVER_H_VERSION_MAJOR 1
@@ -37,47 +36,45 @@ namespace PiEar {
      * @param end Pointer to a bool that, when set to false, will kill the server
      */
     void mainloop_multicast_server(std::vector<channel*>*, std::atomic<bool>*, std::atomic<bool>*);
-
+    /**
+     * This is the class for Boost to use
+     */
     class MulticastServer {
     public:
-        MulticastServer(boost::asio::io_service&, const boost::asio::ip::address&, std::atomic<bool>*);
-        static std::string compress(std::string*);
+        /**
+         * This is the constructor for the multicast server
+         *
+         * @param io_service Service to use
+         * @param address IP address to use
+         * @param kill Pointer to a bool that, when set to true, will kill the server
+         * @param channels Pointer to all channels
+         */
+        MulticastServer(boost::asio::io_service&, const boost::asio::ip::address&, std::atomic<bool>*, std::atomic<bool>*, std::vector<channel*>*);
+        // TODO: Compress the data
+//        /**
+//         * Compress data with gzip
+//         * @param data Data to compress
+//         * @return Compressed buffer
+//         */
+//        static boost::asio::mutable_buffer compress(const uint16_t*);
+//        /**
+//         * Decompress data with gzip
+//         * @param data Data to decompress
+//         * @return Decompressed buffer
+//         */
+//        static boost::asio::mutable_buffer decompress(const uint16_t*);
     private:
-        void handle_timeout(const boost::system::error_code&);
-        void handle_send_to(const boost::system::error_code&);
-        std::atomic<bool>* kill_server;
-        boost::asio::ip::udp::endpoint endpoint_;
-        boost::asio::ip::udp::socket socket_;
-        boost::asio::deadline_timer timer_;
-        int message_count_;
-        std::string message_;
+        /**
+         * This is the function that will be called when the server is started
+         * @param ec Error code
+         */
+        void server_loop(const boost::system::error_code&);
+        std::atomic<bool>* kill_server;           //!< Pointer to a bool that, when set to true, will kill the server
+        std::atomic<bool>* click;                 //!< Pointer to the click
+        boost::asio::ip::udp::endpoint endpoint_; //!< Endpoint to use
+        boost::asio::ip::udp::socket socket_;     //!< Socket to use
+        std::vector<channel*> *channels;          //!< Pointer to all channels
     };
-    /**
-     * Creates the Multicast server
-     *
-     * @return Pointer to a new Poco::Net::MulticastSocket
-     */
-    void make_server();
-
-    /**
-     * Package data from audio streams
-     *
-     * Into spec compliant char*
-     * @param chars_to_return The end length of all packaged data
-     * @param audio_streams The audio streams
-     * @param click_stream The click stream
-     * @return Spec compliant char*
-     */
-    unsigned char* package_data(int chars_to_return, int *audio_streams, bool *click_stream);
-
-    /**
-     * Handles sending data
-     * @param socket Socket to send data on
-     * @param data Data to send
-     * @return Success
-     */
-    bool send_data(void *socket, unsigned char *data);
-
 }
 
 #endif //PIEAR_SERVER_MULTICAST_SERVER_H

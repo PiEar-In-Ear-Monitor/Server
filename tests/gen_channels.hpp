@@ -17,30 +17,24 @@
 // Created by alex on 3/4/22.
 //
 
-#ifndef PIEAR_SERVER_GEN_CHANNELS_H
-#define PIEAR_SERVER_GEN_CHANNELS_H
+#ifndef PIEAR_SERVER_GEN_CHANNELS_HPP
+#define PIEAR_SERVER_GEN_CHANNELS_HPP
 
-#include "channel.hpp"
-#include <vector>
 #include <random>
+#include <vector>
+#include "channel.hpp"
 
-std::vector<PiEar::channel*>* generate_channels(int);
-void generate_channels(int, std::vector<PiEar::channel*>*);
+void generate_channels(int number_of_channels, std::vector<PiEar::channel*> *current_vector) {
+    int channel_count = current_vector->size();
+    for (int i = 0; i < number_of_channels; ++i) {
+        current_vector->push_back(new PiEar::channel(channel_count, std::string("Channel " + std::to_string(channel_count))));
+        channel_count++;
+    }
+}
 
 std::vector<PiEar::channel*>* generate_channels(int number_of_channels) {
     auto vector = new std::vector<PiEar::channel*>;
     generate_channels(number_of_channels, vector);
     return vector;
 }
-
-void generate_channels(int number_of_channels, std::vector<PiEar::channel*> *current_vector) {
-    int channel_count = current_vector->size();
-    std::random_device rd;
-    std::mt19937 mt(rd());
-    std::uniform_real_distribution<double> dist(0, 1);
-    for (int i = 0; i < number_of_channels; ++i) {
-        current_vector->push_back(new PiEar::channel(channel_count, channel_count, std::string("Channel " + std::to_string(channel_count)) , ((int(dist(mt) * 2) % 2) == 0)));
-        channel_count++;
-    }
-}
-#endif //PIEAR_SERVER_GEN_CHANNELS_H
+#endif //PIEAR_SERVER_GEN_CHANNELS_HPP

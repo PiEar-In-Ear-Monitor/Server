@@ -2,7 +2,7 @@
 #include "load-data.hpp"
 #include "channel.hpp"
 #include "task.hpp"
-#include "gen_channels.h"
+#include "gen_channels.hpp"
 #include <vector>
 #include <thread>
 #include <filesystem>
@@ -27,7 +27,6 @@ TEST(testPiEar, task_load) {
     for (int _ = 0; _ < 2; _++) {
         ASSERT_EQ(cha->size(), data->size());
         for (unsigned i = 0; i < cha->size(); i++) {
-            ASSERT_EQ(cha->at(i)->pipewire_id, data->at(i)->pipewire_id);
             ASSERT_EQ(cha->at(i)->piear_id, data->at(i)->piear_id);
             ASSERT_EQ(cha->at(i)->channel_name, data->at(i)->channel_name);
             ASSERT_EQ(cha->at(i)->enabled, data->at(i)->enabled);

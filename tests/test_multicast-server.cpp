@@ -13,24 +13,16 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //******************************************************************************
 
-#include "gtest/gtest.h"
-#include "multicast-server.h"
-#include "channel.hpp"
-#include <boost/asio.hpp>
-#include <thread>
 #include <atomic>
+#include <boost/asio.hpp>
+#include <boost/bind/bind.hpp>
+#include <gtest/gtest.h>
+#include <thread>
 #include <vector>
-#include "boost/bind.hpp"
+#include "channel.hpp"
+#include "multicast-server.h"
 
 namespace PiEar::Test {
-    std::vector<std::string> expectedMessages{
-        "Message 4",
-        "Message 3",
-        "Message 2",
-        "Message 1",
-        "Message 0",
-    };
-
     class receiver {
     public:
         receiver(boost::asio::io_service &io_service, const boost::asio::ip::address &listen_address,
@@ -44,6 +36,10 @@ namespace PiEar::Test {
 
             // Join the multicast group.
             socket_.set_option(boost::asio::ip::multicast::join_group(listen_address));
+            expectedMessage = (uint16_t*) malloc(sizeof(uint16_t) * 128);
+            for (int i = 0; i < 128; ++i) {
+                expectedMessage[i] = i;
+            }
 
             socket_.async_receive_from(
                 boost::asio::buffer(data_, max_length),
@@ -54,11 +50,15 @@ namespace PiEar::Test {
 
         void handle_receive_from(const boost::system::error_code &error, size_t bytes_recvd) {
             if (!error && !(*kill)) {
-                std::string message(data_, bytes_recvd);
-                std::string expected = PiEar::MulticastServer::compress(&expectedMessages.back());
-                EXPECT_EQ(message, expected);
-                expectedMessages.pop_back();
-
+                auto message = (uint16_t*) &data_;
+                if (message[0] == 0) {
+                    EXPECT_FALSE(message[1]);
+                } else {
+                    EXPECT_EQ(message[0], 1);
+                    for (int i = 0; i < 128; i++) {
+                        EXPECT_EQ(expectedMessage[i + 1], *message);
+                    }
+                }
                 socket_.async_receive_from(
                     boost::asio::buffer(data_, max_length),
                     sender_endpoint_,
@@ -72,9 +72,9 @@ namespace PiEar::Test {
         boost::asio::ip::udp::socket socket_;
         boost::asio::ip::udp::endpoint sender_endpoint_;
         enum { max_length = 1024 };
-        char data_[max_length]{};
+        uint16_t *data_;
+        uint16_t *expectedMessage;
     };
-
 
     // Multicast receiver function
     void multicast_receiver(std::atomic<bool> *kill) {
@@ -91,14 +91,29 @@ namespace PiEar::Test {
     TEST(testPiEar, multicast_server) {
         // For right now, send data
         std::vector<PiEar::channel *> channels;
-        channels.push_back(new PiEar::channel(0, 1, "Channel 1", true));
+        channels.push_back(new PiEar::channel(1, "Channel 1", 5));
         std::atomic<bool> click = false;
         std::atomic<bool> kill = false;
+        // Fill buffer with data
+        for (int _ = 0; _ < 5; _++) {
+            auto data = (uint16_t *)malloc(sizeof(uint16_t) * 128);
+            for (uint16_t i = 0; i < 128; i++) {
+                data[i] = i;
+            }
+            channels.back()->buffer.push(data);
+        }
         std::thread multicastThread(PiEar::mainloop_multicast_server, &channels, &click, &kill);
         std::thread receiverThread(multicast_receiver, &kill);
-        sleep(5);
+        sleep(1);
         kill = true;
         multicastThread.join();
         receiverThread.join();
     }
+
+//    TEST(testPiEar, data_compression) {
+//        std::string uncompressed = "This is a test message";
+//        std::string compressed = PiEar::MulticastServer::compress(&uncompressed);
+//        std::string uncompressed2 = PiEar::MulticastServer::decompress(&compressed);
+//        EXPECT_EQ(uncompressed, uncompressed2);
+//    }
 }

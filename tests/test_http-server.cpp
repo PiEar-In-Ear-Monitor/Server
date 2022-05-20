@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "http-server.h"
-#include "gen_channels.h"
+#include "gen_channels.hpp"
 #include "channel.hpp"
 #include <atomic>
 #include <thread>
