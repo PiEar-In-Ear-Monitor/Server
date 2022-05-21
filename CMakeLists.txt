@@ -37,5 +37,5 @@ if(PACKAGE_TESTS)
     target_link_libraries(Save_Load_Data_Test gtest gtest_main pthread)
 
     package_add_test(Ring_Buffer_Test tests/test_ring_buffer.cpp)
-    target_link_libraries(Ring_Buffer_Test gtest gtest_main)
+    target_link_libraries(Ring_Buffer_Test gtest gtest_main pthread)
 endif()
