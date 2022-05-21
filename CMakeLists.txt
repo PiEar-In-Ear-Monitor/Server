@@ -3,6 +3,7 @@ project(PiEar_Server VERSION 1.0)
 set(CMAKE_CXX_STANDARD 20)
 
 option(PACKAGE_TESTS "Build the tests" ON)
+option(AUDIO_TEST "Build the audio test" OFF)
 include_directories(include)
 include_directories(helpers)
 file(GLOB SOURCES "src/*.cpp")
@@ -26,8 +27,8 @@ if(PACKAGE_TESTS)
     package_add_test(Multicast_Test src/multicast-server.cpp tests/test_multicast-server.cpp)
     target_link_libraries(Multicast_Test gtest gtest_main pthread boost_system boost_filesystem boost_iostreams)
 
-    package_add_test(Audio_Test src/audio.cpp tests/test_audio.cpp)
-    target_link_libraries(Audio_Test gtest gtest_main pthread portaudio)
+#    package_add_test(Audio_Test src/audio.cpp tests/test_audio.cpp)
+#    target_link_libraries(Audio_Test gtest gtest_main pthread portaudio)
 
     package_add_test(Http_Server_Test src/http-server.cpp tests/test_http-server.cpp)
     target_link_libraries(Http_Server_Test gtest gtest_main pthread boost_system)
@@ -38,4 +39,3 @@ if(PACKAGE_TESTS)
     package_add_test(Ring_Buffer_Test tests/test_ring_buffer.cpp)
     target_link_libraries(Ring_Buffer_Test gtest gtest_main)
 endif()
-
