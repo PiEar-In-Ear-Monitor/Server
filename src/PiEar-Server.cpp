@@ -61,4 +61,8 @@ int main(int argc, char *argv[]) {
     click_thread.join();
     webserver_thread.join();
     multicast_thread.join();
+
+    for (unsigned long i = 0; i < channels.size(); i++) {
+        delete channels[i];
+    }
 }

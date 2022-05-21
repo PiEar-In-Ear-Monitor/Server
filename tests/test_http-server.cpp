@@ -53,4 +53,8 @@ TEST(testPiEar, http_server) {
     EXPECT_EQ((*channels)[3]->channel_name, "R3VpdGFy"); // Guitar
     EXPECT_EQ((*channels)[4]->channel_name, "TmV3X0NoYW5uZWw="); // New_Channel
     EXPECT_EQ(bpm, 200);
+    for (int i = 0; i < 5; i++) {
+        delete (*channels)[i];
+    }
+    delete channels;
 }

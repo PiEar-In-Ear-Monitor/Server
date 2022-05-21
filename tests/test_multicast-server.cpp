@@ -20,6 +20,7 @@
 #include <thread>
 #include <vector>
 #include "channel.hpp"
+#include "gen_channels.hpp"
 #include "multicast-server.h"
 
 namespace PiEar::Test {
@@ -37,7 +38,7 @@ namespace PiEar::Test {
             // Join the multicast group.
             socket_.set_option(boost::asio::ip::multicast::join_group(listen_address));
             expectedMessage = (uint16_t*) malloc(sizeof(uint16_t) * 128);
-            for (int i = 0; i < 128; ++i) {
+            for (uint16_t i = 0; i < 128; ++i) {
                 expectedMessage[i] = i;
             }
 
@@ -47,7 +48,9 @@ namespace PiEar::Test {
                boost::bind(&receiver::handle_receive_from, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)
             );
         }
-
+        ~receiver() {
+            free(expectedMessage);
+        }
         void handle_receive_from(const boost::system::error_code &error, size_t bytes_recvd) {
             if (!error && !(*kill)) {
                 auto message = (uint16_t*) &data_;
@@ -56,7 +59,7 @@ namespace PiEar::Test {
                 } else {
                     EXPECT_EQ(message[0], 1);
                     for (int i = 0; i < 128; i++) {
-                        EXPECT_EQ(expectedMessage[i + 1], *message);
+                        EXPECT_EQ(expectedMessage[i], message[i + 1]);
                     }
                 }
                 socket_.async_receive_from(
@@ -90,8 +93,7 @@ namespace PiEar::Test {
 
     TEST(testPiEar, multicast_server) {
         // For right now, send data
-        std::vector<PiEar::channel *> channels;
-        channels.push_back(new PiEar::channel(1, "Channel 1", 5));
+        std::vector<PiEar::channel *> *channels = generate_channels(1);
         std::atomic<bool> click = false;
         std::atomic<bool> kill = false;
         // Fill buffer with data
@@ -100,14 +102,17 @@ namespace PiEar::Test {
             for (uint16_t i = 0; i < 128; i++) {
                 data[i] = i;
             }
-            channels.back()->buffer.push(data);
+            channels->back()->buffer.push(data);
+            free(data);
         }
-        std::thread multicastThread(PiEar::mainloop_multicast_server, &channels, &click, &kill);
+        std::thread multicastThread(PiEar::mainloop_multicast_server, channels, &click, &kill);
         std::thread receiverThread(multicast_receiver, &kill);
-        sleep(1);
+        sleep(5);
         kill = true;
         multicastThread.join();
         receiverThread.join();
+        delete channels->back();
+        delete channels;
     }
 
 //    TEST(testPiEar, data_compression) {

@@ -56,4 +56,8 @@ TEST(testPiEar, channel_gen_channel_test) {
         EXPECT_EQ((*to_test)[i]->channel_name, PiEar::channel::base64_encode(std::string("Channel " + std::to_string(i))));
         EXPECT_TRUE((*to_test)[i]->enabled);
     }
+    for (int i = 0; i < 4; i++) {
+        delete (*to_test)[i];
+    }
+    delete to_test;
 }

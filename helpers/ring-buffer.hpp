@@ -2,6 +2,7 @@
 #define PIEAR_SERVER_RINGBUFFER_H
 
 #include <mutex>
+#include <cstring>
 
 namespace PiEar {
     /**
@@ -28,6 +29,7 @@ namespace PiEar {
             if (_buffer == nullptr) {
                 throw std::bad_alloc();
             }
+            memset(_buffer, 0, sizeof(T) * size_of_buffer);
         }
         /**
          * Destructor for the ring buffer.
@@ -48,10 +50,8 @@ namespace PiEar {
                 _readIndex = (_readIndex + _chunkSize) % _size;
                 _chunkCount--;
             }
-            for (int i = 0; i < _chunkSize; i++) {
-                _buffer[_writeIndex] = item[i];
-                _writeIndex = (++_writeIndex) % _size;
-            }
+            memcpy(_buffer + _writeIndex, item, sizeof(T) * _chunkSize);
+            _writeIndex = (_writeIndex + _chunkSize) % _size;
             _chunkCount++;
         }
         /**
@@ -64,12 +64,11 @@ namespace PiEar {
             T *item = static_cast<T *>(malloc(sizeof(T) * _chunkSize));
             std::lock_guard<std::mutex> lock(_mutex);
             if (_chunkCount == 0) {
+                free(item);
                 return nullptr;
             }
-            for (int i = 0; i < _chunkSize; i++) {
-                item[i] = _buffer[_readIndex];
-                _readIndex = (++_readIndex) % _size;
-            }
+            memcpy(item, _buffer + _readIndex, sizeof(T) * _chunkSize);
+            _readIndex = (_readIndex + _chunkSize) % _size;
             _chunkCount--;
             return item;
         }
@@ -86,6 +85,13 @@ namespace PiEar {
          */
         [[nodiscard]] int capacity() const {
             return _size / _chunkSize;
+        }
+        /**
+         * Returns the chunk size.
+         * @return The chunk size.
+         */
+        [[nodiscard]] int chunkSize() const {
+            return _chunkSize;
         }
     private:
         const int _size;      //!< Size of the buffer.

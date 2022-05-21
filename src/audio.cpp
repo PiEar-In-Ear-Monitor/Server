@@ -34,7 +34,7 @@ namespace PiEar {
         // Open the default device
         PaStream* stream;
         if (defaultDeviceInfo->maxInputChannels > channels->size()) {
-            num_channels = channels->size();
+            num_channels = (int) channels->size();
         } else {
             num_channels = defaultDeviceInfo->maxOutputChannels;
         }
