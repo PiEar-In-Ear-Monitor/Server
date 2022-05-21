@@ -1,14 +1,14 @@
-#include "http-server.h"
-#include "channel.hpp"
-#include <vector>
 #include <atomic>
-#include <boost/beast/core.hpp>
-#include <boost/beast/websocket.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/websocket.hpp>
 #include <iostream>
-#include <string>
 #include <nlohmann/json.hpp>
+#include <string>
+#include <vector>
+#include "channel.hpp"
+#include "http-server.h"
 
 namespace PiEar {
     void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm, const std::string& ws_secret, int delay) {
