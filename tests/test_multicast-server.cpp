@@ -24,58 +24,51 @@
 #include "multicast-server.h"
 
 namespace PiEar::Test {
+
     class receiver {
     public:
-        receiver(boost::asio::io_service &io_service, const boost::asio::ip::address &listen_address,
-                 std::atomic<bool> *kill)
-                : socket_(io_service), kill(kill) {
-            // Create the socket so that multiple may be bound to the same address.
+        receiver(boost::asio::io_context& io_context, const boost::asio::ip::address& listen_address, std::atomic<bool>& kill)
+                : socket_(io_context) , kill_(kill), data_() {
             boost::asio::ip::udp::endpoint listen_endpoint(listen_address, MULTICAST_SERVER_PORT);
             socket_.open(listen_endpoint.protocol());
             socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
             socket_.bind(listen_endpoint);
-
-            // Join the multicast group.
-            socket_.set_option(boost::asio::ip::multicast::join_group(listen_address));
+            socket_.set_option(boost::asio::ip::multicast::join_group(boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP)));
             expectedMessage = (uint16_t*) malloc(sizeof(uint16_t) * 128);
             for (uint16_t i = 0; i < 128; ++i) {
                 expectedMessage[i] = i;
             }
-
-            socket_.async_receive_from(
-                boost::asio::buffer(data_, max_length),
-                sender_endpoint_,
-               boost::bind(&receiver::handle_receive_from, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)
-            );
+            do_receive();
         }
         ~receiver() {
             free(expectedMessage);
         }
-        void handle_receive_from(const boost::system::error_code &error, size_t bytes_recvd) {
-            if (!error && !(*kill)) {
-                auto message = (uint16_t*) &data_;
-                if (message[0] == 0) {
-                    EXPECT_FALSE(message[1]);
-                } else {
-                    EXPECT_EQ(message[0], 1);
-                    for (int i = 0; i < 128; i++) {
-                        EXPECT_EQ(expectedMessage[i], message[i + 1]);
+    private:
+        void do_receive() {
+            socket_.async_receive_from(
+                boost::asio::buffer(data_), sender_endpoint_,
+                [this](boost::system::error_code ec, std::size_t length) {
+                    if (!ec) {
+                        auto message = (uint16_t*) &data_;
+                        if (message[0] == 0) {
+                            EXPECT_FALSE(message[1]);
+                        } else {
+                            EXPECT_EQ(message[0], 1);
+                            for (int i = 0; i < 128; i++) {
+                                EXPECT_EQ(expectedMessage[i], message[i + 1]);
+                            }
+                        }
+                        if (!kill_) {
+                            do_receive();
+                        }
                     }
                 }
-                socket_.async_receive_from(
-                    boost::asio::buffer(data_, max_length),
-                    sender_endpoint_,
-                    boost::bind(&receiver::handle_receive_from, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred)
-                );
-            }
+            );
         }
-
-    private:
-        std::atomic<bool> *kill;
         boost::asio::ip::udp::socket socket_;
         boost::asio::ip::udp::endpoint sender_endpoint_;
-        enum { max_length = 1024 };
-        uint16_t *data_;
+        std::array<char, 1024> data_;
+        std::atomic<bool>& kill_;
         uint16_t *expectedMessage;
     };
 
@@ -83,7 +76,7 @@ namespace PiEar::Test {
     void multicast_receiver(std::atomic<bool> *kill) {
         try {
             boost::asio::io_service io_service;
-            receiver r(io_service, boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP), kill);
+            receiver r(io_service, boost::asio::ip::address::from_string("0.0.0.0"), *kill);
             io_service.run();
         }
         catch (std::exception &e) {
@@ -94,6 +87,7 @@ namespace PiEar::Test {
     TEST(testPiEar, multicast_server) {
         // For right now, send data
         std::vector<PiEar::channel *> *channels = generate_channels(1);
+        channels->back()->piear_id = 1;
         std::atomic<bool> click = false;
         std::atomic<bool> kill = false;
         // Fill buffer with data
@@ -105,9 +99,9 @@ namespace PiEar::Test {
             channels->back()->buffer.push(data);
             free(data);
         }
-        std::thread multicastThread(PiEar::mainloop_multicast_server, channels, &click, &kill);
         std::thread receiverThread(multicast_receiver, &kill);
-        sleep(5);
+        std::thread multicastThread(PiEar::mainloop_multicast_server, channels, &click, &kill);
+        sleep(1);
         kill = true;
         multicastThread.join();
         receiverThread.join();
