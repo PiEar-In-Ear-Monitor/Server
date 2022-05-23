@@ -6,7 +6,7 @@ servers:
   - url: http://localhost:9090
 paths:
   /channel-name:
-    description: Get and set a channel name
+    description: Get and set a channel name (Base64 encoded)
     get:
       description: Get channel count
       parameters: 
@@ -24,7 +24,7 @@ paths:
               schema:
                 type: object
     put:
-      description: Set the channel name
+      description: Set the channel name (Base64 encoded)
       responses:
         '200':
           description: OK

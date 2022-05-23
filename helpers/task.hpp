@@ -1,32 +1,23 @@
-/**
- * @file task.hpp
- * @brief Provides File save of current channel names every minute
- * @author Alex O'Connor
- * @date 8 February 2022
- */
-
 #ifndef PIEAR_SERVER_TASK_HPP
 #define PIEAR_SERVER_TASK_HPP
 
-#include "channel.hpp"
+#include <chrono>
+#include <fstream>
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
-#include <fstream>
-#include <thread>
-#include <iostream>
-#include <chrono>
+#include "channel.hpp"
 
 namespace PiEar {
     class task {
     public:
         std::vector<PiEar::channel *> *channels; //!< Channels to save
         std::string file_path;                   //!< File path to save to
-        bool kill_task;                         //!< When set true, the task will not reschedule itself
-        std::thread save_task_thread;
-        bool is_running;
-        int save_interval;
-
+        bool kill_task;                          //!< When set true, the task will not reschedule itself
+        std::thread save_task_thread;            //!< Thread to run the task on
+        bool is_running;                         //!< Is the task running?
+        int save_interval;                       //!< How often to save the channels
         /**
          * function that initializes `save_task` for its
          * first run.
@@ -37,12 +28,14 @@ namespace PiEar {
          * @param int Is the time between writing to the save file
          */
         task(std::vector<PiEar::channel *> *c, std::string f, int save_pause);
-
-        // Functions
+        /**
+         * function begins the task
+         */
         void async_run_save_task();
-
+        /**
+         * function stops the task
+         */
         void async_stop_save_task();
-
         /**
          * Creates a JSON representation of `channels`
          * {
@@ -50,7 +43,6 @@ namespace PiEar {
          *      [
          *          {
          *              "piear_id": <int>,
-         *              "pipewire_id": <int>,
          *              "channel": <string>,
          *              "enabled": <bool>
          *          },
@@ -71,7 +63,6 @@ namespace PiEar {
             s << "]}";
             return s.str();
         }
-
         /**
          * Task that saves `channels`
          */
@@ -87,7 +78,6 @@ namespace PiEar {
             }
         }
     };
-
     task::task(std::vector<PiEar::channel*> *c, std::string f, int save_pause){
         this->channels = c;
         this->file_path = std::move(f);
@@ -95,14 +85,12 @@ namespace PiEar {
         this->save_interval = save_pause;
         this->is_running = false;
     }
-
     void task::async_run_save_task() {
         if (!this->is_running) {
             this->is_running = true;
             save_task_thread = std::thread(save_task, this);
         }
     }
-
     void task::async_stop_save_task() {
         this->kill_task = true;
         save_task_thread.join();

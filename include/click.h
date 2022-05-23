@@ -1,15 +1,7 @@
-/**
- * @file click.h
- * @brief Provides click functionality
- * @author Alex O'Connor
- * @date 12 December 2021
- */
-
 #ifndef PIEAR_SERVER_CLICK_H
 #define PIEAR_SERVER_CLICK_H
 
 #include <atomic>
-#include <chrono>
 
 namespace PiEar {
     /**
