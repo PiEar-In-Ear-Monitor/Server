@@ -1,22 +1,10 @@
-/**
- * @file http-server.h
- * @brief This is the HTTP server header file for this project.
- * @author Alexander O'Connor
- * @date 30 December 2021
- */
-
 #ifndef PIEAR_SERVER_HTTP_SERVER_H
 #define PIEAR_SERVER_HTTP_SERVER_H
 
-#include "channel.hpp"
-#include <string>
 #include <atomic>
-#include <thread>
+#include <string>
 #include <vector>
-#include <boost/beast/core.hpp>
-#include <boost/beast/websocket.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/ip/tcp.hpp>
+#include "channel.hpp"
 
 namespace PiEar {
     /**
@@ -25,7 +13,11 @@ namespace PiEar {
      * @param std::atomic<bool> This is the kill swtitch for the http server
      */
     void mainloop_http_server(std::atomic<bool>*, std::vector<channel*>*, std::atomic<int>*, const std::string&, int);
-
+    /**
+     * @brief This is used to kill the server thread.
+     * @param int This is the pid of the server thread
+     * @param std::atomic<bool> This is the kill switch for the http server
+     */
     void kill_server_waiter(int, std::atomic<bool>*);
 }
 

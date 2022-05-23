@@ -1,7 +1,3 @@
-//
-// Created by alex on 2/7/22.
-//
-
 #ifndef PIEAR_SERVER_CHANNEL_HPP
 #define PIEAR_SERVER_CHANNEL_HPP
 
@@ -40,8 +36,8 @@ namespace PiEar {
         /**
          * @param int piear_id
          * @param std::string channel name
-         * @param bool enabled
-         * @param buffer_size size of the buffer
+         * @param bool enabled (default true)
+         * @param buffer_size size of the buffer (default BUFFER_SIZE)
          */
         channel(int pe_id, const std::string& c_name, bool en = true, int buffer_size = BUFFER_SIZE) :
                 piear_id(pe_id), channel_name(base64_encode(c_name)), buffer(buffer_size * BUFFER_CHUNK_SIZE, BUFFER_CHUNK_SIZE) , enabled(en) {}

@@ -1,7 +1,7 @@
-#include "gtest/gtest.h"
-#include "ring-buffer.hpp"
-#include <string>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <string>
+#include "ring-buffer.hpp"
 
 TEST(testPiEar, ring_buffer_basic) {
     int chunk_size = 2;
@@ -21,7 +21,6 @@ TEST(testPiEar, ring_buffer_basic) {
     free(output);
     free(input);
 }
-
 TEST(testPiEar, ring_buffer_too_full) {
     int chunk_size = 5;
     int *input = (int*) malloc(sizeof(int) * chunk_size);
@@ -40,7 +39,6 @@ TEST(testPiEar, ring_buffer_too_full) {
     free(output);
     free(input);
 }
-
 TEST(testPiEar, ring_buffer_empty) {
     int chunk_size = 5;
     int *output;

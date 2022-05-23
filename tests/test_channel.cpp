@@ -9,7 +9,6 @@ TEST(testPiEar, channel_basic_usage) {
     EXPECT_EQ(to_test, 1);
     EXPECT_EQ(to_test.piear_id, 1);
 }
-
 TEST(testPiEar, channel_bool_test) {
     PiEar::channel to_test(1, std::string("Hello World"));
     EXPECT_TRUE(to_test);
@@ -24,7 +23,6 @@ TEST(testPiEar, channel_bool_test) {
         }
     }
 }
-
 TEST(testPiEar, channel_int_test) {
     PiEar::channel to_test(1, std::string("Hello World"));
     EXPECT_EQ(to_test, 1);
@@ -37,7 +35,6 @@ TEST(testPiEar, channel_int_test) {
         EXPECT_FALSE(to_test == i + 2);
     }
 }
-
 TEST(testPiEar, channel_string_test) {
     PiEar::channel to_test(1, std::string("Hello World"));
     EXPECT_EQ(to_test, 1);
@@ -48,7 +45,6 @@ TEST(testPiEar, channel_string_test) {
     EXPECT_EQ(to_test.channel_name, std::string("TmV3IE5hbWU="));
     EXPECT_EQ((std::string)to_test, std::string("{\"piear_id\":4,\"channel_name\":\"TmV3IE5hbWU=\",\"enabled\":false}"));
 }
-
 TEST(testPiEar, channel_gen_channel_test) {
     std::vector<PiEar::channel*> *to_test = generate_channels(4);
     for (int i = 0; i < 4; i++) {

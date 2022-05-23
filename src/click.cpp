@@ -1,6 +1,6 @@
-#include "click.h"
-#include <chrono>
 #include <atomic>
+#include <chrono>
+#include "click.h"
 
 namespace PiEar {
     void mainloop_click(std::atomic<int> *cpm, std::atomic<bool> *click, std::atomic<bool> *kill_click) {

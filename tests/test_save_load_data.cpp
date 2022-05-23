@@ -14,7 +14,6 @@ std::vector<PiEar::channel*> *load_from_file(const std::string& path) {
     std::string data = PiEar::get_file_contents(path);
     return PiEar::process_array(&data, "channels");
 }
-
 TEST(testPiEar, task_load) {
     auto cha = generate_channels(3);
     std::string full_path = std::filesystem::temp_directory_path().string() + DIRECTORY_SEPARATOR + "piear_test_save_load.json";

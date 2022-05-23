@@ -1,10 +1,10 @@
-#include "gtest/gtest.h"
-#include "http-server.h"
-#include "gen_channels.hpp"
-#include "channel.hpp"
 #include <atomic>
+#include <gtest/gtest.h>
 #include <thread>
 #include <vector>
+#include "channel.hpp"
+#include "gen_channels.hpp"
+#include "http-server.h"
 
 TEST(testPiEar, http_server) {
     std::atomic<bool> kill = false;
