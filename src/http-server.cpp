@@ -6,6 +6,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <string>
+#include <thread>
 #include <vector>
 #include "channel.hpp"
 #include "http-server.h"

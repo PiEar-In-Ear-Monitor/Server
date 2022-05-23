@@ -51,5 +51,4 @@ namespace PiEar {
         uint16_t *tmp_buffer; //!< The temporary buffer.
     };
 }
-
 #endif //PIEAR_SERVER_AUDIO_H

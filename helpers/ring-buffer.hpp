@@ -1,8 +1,8 @@
 #ifndef PIEAR_SERVER_RINGBUFFER_H
 #define PIEAR_SERVER_RINGBUFFER_H
 
-#include <mutex>
 #include <cstring>
+#include <mutex>
 
 namespace PiEar {
     /**
@@ -73,21 +73,23 @@ namespace PiEar {
             return item;
         }
         /**
-         * Returns the size of the buffer.
+         * Returns the size of the buffer in
+         * terms of how many objects it can hold.
          * @return The size of the buffer.
          */
         [[nodiscard]] int size() const {
             return _size;
         }
         /**
-         * Returns the number of chunks in the buffer.
-         * @return The number of chunks in the buffer.
+         * Returns the number of chunks the buffer can hold.
+         * @return The number of chunks.
          */
         [[nodiscard]] int capacity() const {
             return _size / _chunkSize;
         }
         /**
-         * Returns the chunk size.
+         * Returns the chunk size in bytes in terms
+         * of how many objects it can hold.
          * @return The chunk size.
          */
         [[nodiscard]] int chunkSize() const {

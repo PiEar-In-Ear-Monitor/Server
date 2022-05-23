@@ -1,16 +1,8 @@
-/**
- * @file task.hpp
- * @brief Provides File save of current channel names every minute
- * @author Alex O'Connor
- * @date 8 February 2022
- */
-
 #ifndef PIEAR_SERVER_TASK_HPP
 #define PIEAR_SERVER_TASK_HPP
 
 #include <chrono>
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <thread>
 #include <utility>
