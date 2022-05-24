@@ -1,0 +1,48 @@
+# Maintainer: Alex O'Connor <Alex.nderOConnor@gmail.com>
+pkgname=piear
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="A Software based in-ear solution"
+arch=('x86_64')
+url="https://github.com/PiEar-In-Ear-Monitor/Server"
+license=('custom:MIT')
+groups=()
+depends=()
+makedepends=(cmake gcc boost nlohmann-json portaudio nodejs-lts-gallium)
+checkdepends=(gtest)
+optdepends=()
+provides=(piear)
+conflicts=()
+replaces=()
+backup=()
+options=()
+install=
+changelog=
+source=("$pkgname"::"git+file:///home/alex/Documents/Uni-Private/2022/Winter/CPTR-488/Server")
+# source=("$pkgname-$pkgver.tar.gz::https://github.com/PiEar-In-Ear-Monitor/Server/archive/refs/tags/$pkgver.tar.gz")
+noextract=()
+sha256sums=("SKIP")
+# sha256sums=("e60acebaacf57fd72ea70dc6d51650ed5454a551cde39b02195d391949fb0cc4")
+validpgpkeys=()
+
+# prepare() {
+#     tar -xvf "$pkgname-$pkgver.tar.gz"
+#     mv "Server-$pkgver/" "$pkgname"
+#     cd "$pkgname-$pkgver"
+# }
+
+build() {
+    cd "$pkgname"
+    [[ -d build ]] && rm -r build
+    mkdir build && cd build
+    cmake -DPACKAGE_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/usr ..
+}
+
+package() {
+    cd "$pkgname"
+    git branch
+    npm --prefix PiEar_HTTP_Server install
+    DESTDIR="$pkgdir" cmake --install build
+    mkdir -p $pkgdir/usr/share/licenses/piear
+    cp LICENSE $pkgdir/usr/share/licenses/piear/LICENSE-MIT
+}
