@@ -1,14 +1,14 @@
 # Maintainer: Alex O'Connor <Alex.nderOConnor@gmail.com>
 pkgname=piear
-pkgver=1.0.0
+pkgver=0.5.0
 pkgrel=1
 pkgdesc="A Software based in-ear solution"
 arch=('x86_64')
 url="https://github.com/PiEar-In-Ear-Monitor/Server"
 license=('custom:MIT')
 groups=()
-depends=(boost nlohmann-json portaudio nodejs-lts-gallium)
-makedepends=(cmake g++)
+depends=(portaudio nodejs-lts-gallium)
+makedepends=(cmake gcc boost nlohmann-json)
 checkdepends=(gtest)
 optdepends=()
 provides=(piear)
@@ -18,23 +18,18 @@ backup=()
 options=()
 install=
 changelog=
-source=("$pkgname"::"git+file:///home/alex/Documents/Uni-Private/2022/Winter/CPTR-488/Server")
-# source=("$pkgname-$pkgver.tar.gz::https://github.com/PiEar-In-Ear-Monitor/Server/archive/refs/tags/$pkgver.tar.gz")
+source=("$pkgname-$pkgver.tar.gz::https://github.com/PiEar-In-Ear-Monitor/Server/archive/refs/tags/v0.5.0.tar.gz")
 noextract=()
-sha256sums=("SKIP")
-# sha256sums=("e60acebaacf57fd72ea70dc6d51650ed5454a551cde39b02195d391949fb0cc4")
+sha256sums=("ce0173b5d9c0d112dcd89bbf8cdf53024da4039d4db1daceb22431908c8b97b8")
 validpgpkeys=()
 
-# prepare() {
-#     tar -xvf "$pkgname-$pkgver.tar.gz"
-#     mv "Server-$pkgver/" "$pkgname"
-#     cd "$pkgname-$pkgver"
-# }
+prepare() {
+    tar -xvf "$pkgname-$pkgver.tar.gz"
+    mv "Server-$pkgver/" "$pkgname"
+}
 
 build() {
     cd "$pkgname"
-    git checkout feature/packaging
-    git branch
     [[ -d build ]] && rm -r build
     cmake -DCMAKE_INSTALL_PREFIX=/usr -DPACKAGE_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -B build
     cmake --build build
@@ -42,7 +37,7 @@ build() {
 
 package() {
     cd "$pkgname"
-    npm --prefix PiEar_HTTP_Server install build
+    npm --prefix webserver install
     cmake --install build --prefix $pkgdir/usr
     mkdir -p $pkgdir/usr/share/licenses/piear
     cp LICENSE $pkgdir/usr/share/licenses/piear/LICENSE-MIT
