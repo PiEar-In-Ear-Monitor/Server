@@ -7,8 +7,8 @@ arch=('x86_64')
 url="https://github.com/PiEar-In-Ear-Monitor/Server"
 license=('custom:MIT')
 groups=()
-depends=()
-makedepends=(cmake gcc boost nlohmann-json portaudio nodejs-lts-gallium)
+depends=(boost nlohmann-json portaudio nodejs-lts-gallium)
+makedepends=(cmake g++)
 checkdepends=(gtest)
 optdepends=()
 provides=(piear)
@@ -33,16 +33,17 @@ validpgpkeys=()
 
 build() {
     cd "$pkgname"
+    git checkout feature/packaging
+    git branch
     [[ -d build ]] && rm -r build
-    mkdir build && cd build
-    cmake -DPACKAGE_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/usr ..
+    cmake -DCMAKE_INSTALL_PREFIX=/usr -DPACKAGE_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -B build
+    cmake --build build
 }
 
 package() {
     cd "$pkgname"
-    git branch
-    npm --prefix PiEar_HTTP_Server install
-    DESTDIR="$pkgdir" cmake --install build
+    npm --prefix PiEar_HTTP_Server install build
+    cmake --install build --prefix $pkgdir/usr
     mkdir -p $pkgdir/usr/share/licenses/piear
     cp LICENSE $pkgdir/usr/share/licenses/piear/LICENSE-MIT
 }
