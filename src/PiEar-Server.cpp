@@ -24,11 +24,14 @@ int main(int argc, char *argv[]) {
     std::atomic<bool> click = false, kill_audio = false, kill_click = false, kill_http = false, kill_multicast = false;
     std::atomic<int> cpm = 100;
     std::vector<PiEar::channel*> channels;
-    int number_of_audio_channels = 64;
-    for (int i = 0; i < number_of_audio_channels; i++) {
+    PiEar::Audio audio = PiEar::Audio(&kill_audio, &channels);
+    if (audio.channel_count() < 1) {
+        std::cout << "No audio channels found" << std::endl;
+        return 1;
+    }
+    for (int i = 0; i < audio.channel_count(); i++) {
         channels.push_back(new PiEar::channel(i, "Channel " + std::to_string(i)));
     }
-    PiEar::Audio audio = PiEar::Audio(&kill_audio, &channels);
     // Start threads
     std::thread audio_thread(&PiEar::Audio::audio_thread, &audio); // Determine if test can run on gh runner
     std::thread click_thread(PiEar::mainloop_click, &cpm, &click, &kill_click);
