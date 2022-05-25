@@ -18,7 +18,6 @@ namespace PiEar {
             // TODO: Log this error
             throw std::runtime_error("PortAudio error initializing");
         }
-        else std::cout << "PortAudio initialized" << std::endl;
         // Find out how many devices there are
         const PaDeviceInfo* defaultDeviceInfo = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice()); // TODO: Make this configurable
 //        int numDevices = Pa_GetDeviceCount();
@@ -36,7 +35,7 @@ namespace PiEar {
         if (defaultDeviceInfo->maxInputChannels > channels->size()) {
             num_channels = (int) channels->size();
         } else {
-            num_channels = defaultDeviceInfo->maxOutputChannels;
+            num_channels = defaultDeviceInfo->maxInputChannels;
         }
         err = Pa_OpenDefaultStream( &stream,
                                     num_channels,  /* Max input */
@@ -86,6 +85,12 @@ namespace PiEar {
         return 0;
     }
     int Audio::channel_count() const {
-        return num_channels;
+        int err = Pa_Initialize();
+        if( err != paNoError ){
+            // TODO: Log this error
+            throw std::runtime_error("PortAudio error initializing");
+        }
+        const PaDeviceInfo* defaultDeviceInfo = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice()); // TODO: This will need to be configurable
+        return defaultDeviceInfo->maxInputChannels;
     }
 }
