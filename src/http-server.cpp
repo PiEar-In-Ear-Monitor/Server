@@ -21,7 +21,7 @@ namespace PiEar {
             server_args.push_back(const_cast<char*>(ws_secret.c_str()));
             server_args.push_back(nullptr);
             char **command = server_args.data();
-            execve("../PiEar_HTTP_Server/src/PiEar_HTTP_Server.js", &command[0], nullptr);
+            execve("/usr/share/piear/webserver/src/PiEar_HTTP_Server.js", &command[0], nullptr);
             return; // Redundant
         }
         sleep(delay);

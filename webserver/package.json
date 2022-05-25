@@ -2,7 +2,7 @@
   "name": "piear_http_server",
   "version": "1.0.0",
   "description": "HTTP Server for PiEar",
-  "main": "src/PiEar_HTTP_Server.js",
+  "main": "",
   "scripts": {
     "preSetup": "tests/beforeSetup.js",
     "postSetup": "tests/afterSetup.js"

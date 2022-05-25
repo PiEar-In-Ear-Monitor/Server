@@ -18,7 +18,7 @@ TEST(testPiEar, http_server) {
         server_args.push_back(const_cast<char*>("beforeSetup.js"));
         server_args.push_back(nullptr);
         char **command = server_args.data();
-        execve("../PiEar_HTTP_Server/tests/beforeSetup.js", &command[0], nullptr);
+        execve("/usr/share/piear/webserver/tests/beforeSetup.js", &command[0], nullptr);
         return; // Redundant
     }
     // Run command and wait for it to finish
@@ -31,7 +31,7 @@ TEST(testPiEar, http_server) {
         server_args.push_back(const_cast<char*>("afterSetup.js"));
         server_args.push_back(nullptr);
         char **command = server_args.data();
-        execve("../PiEar_HTTP_Server/tests/afterSetup.js", &command[0], nullptr);
+        execve("/usr/share/piear/webserver/tests/afterSetup.js", &command[0], nullptr);
         return; // Redundant
     }
     waitpid(node_thread, nullptr, 0);
@@ -41,7 +41,7 @@ TEST(testPiEar, http_server) {
         server_args.push_back(const_cast<char*>("testValidators.js"));
         server_args.push_back(nullptr);
         char **command = server_args.data();
-        execve("../PiEar_HTTP_Server/tests/testValidators.js", &command[0], nullptr);
+        execve("/usr/share/piear/webserver/tests/testValidators.js", &command[0], nullptr);
         return; // Redundant
     }
     waitpid(node_thread, nullptr, 0);
