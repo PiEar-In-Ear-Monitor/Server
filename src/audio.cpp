@@ -39,7 +39,7 @@ namespace PiEar {
         }
         err = Pa_OpenDefaultStream( &stream,
                                     num_channels,  /* Max input */
-                                    defaultDeviceInfo->maxOutputChannels, /* Max output */
+                                    0, /* Max output */
                                     paInt16,                              /* 16 Bit Audio */
                                     defaultDeviceInfo->defaultSampleRate, /* Best sample rate possible from device TODO: Should this always be so high? */
                                     FRAMES_PER_BUFFER,                    /* frames per buffer TODO: consider: paFramesPerBufferUnspecified */

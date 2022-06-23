@@ -1,7 +1,6 @@
 #include <boost/asio.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/bind/bind.hpp>
-#include <cstring>
 #include <iostream>
 #include <string>
 #include "channel.hpp"
@@ -29,14 +28,12 @@ namespace PiEar {
         server_loop(boost::system::error_code());
     }
     void PiEar::MulticastServer::server_loop(const boost::system::error_code& error) {
-        auto click_data = new uint16_t[2];
+        std::thread send_click_stream_thread([this] {send_click_stream();});
         auto data_with_channel = new uint16_t[channels->back()->buffer.chunkSize() + 1];
-        click_data[0] = 0;
         while(!(*kill_server)) {
-            click_data[1] = (*click) ? 1 : 0;
-            socket_.send_to(boost::asio::buffer(click_data, 2 * sizeof(uint16_t)), endpoint_);
-            for (auto channel : *channels) {
-                // if the channel is active
+//            for (auto channel : *channels) {
+            for (int i = 0; i < 2; i++) {
+                auto channel = channels->at(i);
                 if (channel->enabled) {
                     data_with_channel[0] = channel->piear_id;
                     uint16_t *data = channel->buffer.pop();
@@ -45,12 +42,29 @@ namespace PiEar {
                     }
                     memcpy(data_with_channel + 1, data, sizeof(uint16_t) * (channel->buffer.chunkSize()));
                     free(data);
+                    mutex_.lock();
                     socket_.send_to(boost::asio::buffer(data_with_channel, sizeof(uint16_t) * (channel->buffer.chunkSize() + 1)), endpoint_);
+                    mutex_.unlock();
                 }
             }
         }
         delete[] data_with_channel;
-        delete[] click_data;
+        send_click_stream_thread.join();
+    }
+
+    void MulticastServer::send_click_stream() {
+        auto click_true = new uint16_t[2]{0, 1};
+        auto click_false = new uint16_t[2]{0, 0};
+        while(!(*kill_server)) {
+            if (*click) {
+                mutex_.lock();
+                socket_.send_to(boost::asio::buffer(click_true, 2 * sizeof(uint16_t)), endpoint_);
+                mutex_.unlock();
+                while (*click);
+            }
+        }
+        delete[] click_true;
+        delete[] click_false;
     }
 //    boost::asio::mutable_buffer PiEar::MulticastServer::compress(const uint16_t *stream) {
 //        boost::iostreams::stream< boost::iostreams::array_source > source (stream, 128);
