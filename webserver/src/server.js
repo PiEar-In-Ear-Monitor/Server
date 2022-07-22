@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(cors());
 app.use(function(req, res, next) {
     res.header("WebServer", "PiEar-HTTP-Sever");
-    if (app.locals.bpm !== -1 || req.url === "/abcdefghijklmnopqrstuvwxyz" || req.headers["shared-secret"] === app.locals.wsSecret) {
+    if (app.locals.bpm !== -1 || req.headers["shared-secret"] === app.locals.wsSecret) {
         next();
     } else {
         res.status(200).json({error: "Server not initialized"});            
@@ -19,6 +19,7 @@ app.use(function(req, res, next) {
 app.locals.bpm = -1;
 app.locals.bpmEnabled = "false";
 app.locals.channels = [];
+app.locals.devices = [];
 app.locals.sse = [];
 app.locals.wsConnection = null;
 app.locals.wsSecret = (process.argv.length === 3)? process.argv[2] : "";
@@ -91,11 +92,24 @@ function putChannelName(req, res) {
     res.status(200).json({channel_name: newName});
 }
 
-
 app.put("/channel-name", (req, res) => { putChannelName(req, res); });
 
-app.get("/abcdefghijklmnopqrstuvwxyz", (req, res) => {
-    res.status(200).contentType("text/plain").send("zyxwvutsrqponmlkjihgfedcba");
+app.get("/devices", (req, res) => { res.status(200).json({device: app.locals.device, devices: app.locals.devices}); });
+
+app.put("/devices", (req, res) => {
+    let id = validNumber(req.query.id);
+    if ( id === null) {
+        res.status(422).json({error: "expected a query, \"id\", to be a number"});
+        return;
+    }
+    let final = app.locals.devices.filter((device) => device.index === id);
+    if (final.length !== 1) {
+        res.status(422).json({error: `Cannot find device with id ${id}`});
+        return;
+    }
+    app.locals.device = id;
+    app.locals.wsConnection.send(JSON.stringify({device: app.locals.device}));
+    res.status(200).json({device: app.locals.device});
 });
 
 app.listen(9090);
@@ -109,8 +123,15 @@ function handleWs(ws) {
                 let json = JSON.parse(message.replace("\u0000", ""));
                 if (typeof json.bpm !== "undefined") {
                     app.locals.bpm = json.bpm;
-                } else {
-                    app.locals.channels.push({piear_id: json.piear_id, channel_name:json.channel_name});
+                }
+                if (typeof json.device !== "undefined") {
+                    app.locals.devices.push(json.device);
+                }
+                if (typeof json.active_device !== "undefined") {
+                    app.locals.device = json.active_device;
+                }
+                if (typeof json.piear_id !== "undefined" && typeof json.channel_name !== "undefined") {
+                    app.locals.channels.push({piear_id: json.piear_id, channel_name: json.channel_name});
                 }
             } catch (e) {
                 return;

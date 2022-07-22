@@ -78,14 +78,3 @@ paths:
             type: boolean
           required: false
           description: new bpm
-  /abcdefghijklmnopqrstuvwxyz:
-    description: Endpoint to locate server
-    get:
-      description: Returns alphabet backwards
-      responses:
-        '200':
-          description: OK
-          content:
-            plain/text:
-              schema:
-                type: object
