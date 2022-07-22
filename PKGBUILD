@@ -7,8 +7,8 @@ arch=('x86_64')
 url="https://github.com/PiEar-In-Ear-Monitor/Server"
 license=('custom:MIT')
 groups=()
-depends=(portaudio nodejs-lts-gallium)
-makedepends=(cmake gcc boost nlohmann-json)
+depends=(portaudio nodejs)
+makedepends=(cmake gcc boost nlohmann-json npm)
 checkdepends=(gtest)
 optdepends=()
 provides=(piear)
@@ -42,4 +42,5 @@ package() {
     mkdir -p $pkgdir/usr/share/licenses/piear
     cp LICENSE $pkgdir/usr/share/licenses/piear/LICENSE-MIT
     mkdir -p $pkgdir/lib/systemd/service
+    cp piear.service $pkgdir/lib/systemd/service
 }

@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include <thread>
 #include <vector>
+#include "audio.h"
 #include "channel.hpp"
 #include "gen_channels.hpp"
 #include "http-server.h"
@@ -10,7 +11,13 @@ TEST(testPiEar, http_server) {
     std::atomic<bool> kill = false;
     std::atomic<int> bpm = 100;
     std::vector<PiEar::channel*> *channels = generate_channels(5);
-    std::thread server(PiEar::mainloop_http_server, &kill, channels, &bpm, "ws_test", 2);
+    std::vector<PiEar::audioDevice> devices;
+    PiEar::audioDevice device;
+    device.name = "Test Device";
+    device.channels = 2;
+    device.index = 0;
+    devices.push_back(device);
+    std::thread server(PiEar::mainloop_http_server, &kill, channels, &bpm, "ws_test", 2, devices, 0);
     sleep(1);
     int node_thread = fork();
     if (!node_thread) {
@@ -18,7 +25,7 @@ TEST(testPiEar, http_server) {
         server_args.push_back(const_cast<char*>("beforeSetup.js"));
         server_args.push_back(nullptr);
         char **command = server_args.data();
-        execve("/usr/share/piear/webserver/tests/beforeSetup.js", &command[0], nullptr);
+        execve((PiEar::server_executable_dir() + "tests/beforeSetup.js").c_str(), &command[0], nullptr);
         return; // Redundant
     }
     // Run command and wait for it to finish
@@ -31,7 +38,7 @@ TEST(testPiEar, http_server) {
         server_args.push_back(const_cast<char*>("afterSetup.js"));
         server_args.push_back(nullptr);
         char **command = server_args.data();
-        execve("/usr/share/piear/webserver/tests/afterSetup.js", &command[0], nullptr);
+        execve((PiEar::server_executable_dir() + "tests/afterSetup.js").c_str(), &command[0], nullptr);
         return; // Redundant
     }
     waitpid(node_thread, nullptr, 0);
@@ -41,7 +48,7 @@ TEST(testPiEar, http_server) {
         server_args.push_back(const_cast<char*>("testValidators.js"));
         server_args.push_back(nullptr);
         char **command = server_args.data();
-        execve("/usr/share/piear/webserver/tests/testValidators.js", &command[0], nullptr);
+        execve((PiEar::server_executable_dir() + "tests/testValidators.js").c_str(), &command[0], nullptr);
         return; // Redundant
     }
     waitpid(node_thread, nullptr, 0);

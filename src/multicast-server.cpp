@@ -32,7 +32,7 @@ namespace PiEar {
         auto data_with_channel = new uint16_t[channels->back()->buffer.chunkSize() + 1];
         while(!(*kill_server)) {
 //            for (auto channel : *channels) {
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 1; i++) {
                 auto channel = channels->at(i);
                 if (channel->enabled) {
                     data_with_channel[0] = channel->piear_id;

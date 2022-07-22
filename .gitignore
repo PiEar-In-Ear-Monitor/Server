@@ -34,9 +34,8 @@
 /cmake-build-debug-coverage/
 /cmake-build-release/
 /docs/
-.*
-
-webserver/node_modules/.package-lock.json
-webserver/node_modules/
-
-webserver/package-lock.json
+/build/
+!/PKGBUILD
+PiEar_HTTP_Server/node_modules/.package-lock.json
+PiEar_HTTP_Server/node_modules/
+*/.vscode/

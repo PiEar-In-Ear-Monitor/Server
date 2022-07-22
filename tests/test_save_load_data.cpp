@@ -10,19 +10,26 @@
 #include "task.hpp"
 
 #define DIRECTORY_SEPARATOR "/"
-std::vector<PiEar::channel*> *load_from_file(const std::string& path) {
-    std::string data = PiEar::get_file_contents(path);
-    return PiEar::process_array(&data, "channels");
+std::vector<PiEar::channel*> *load_from_file(const std::string& path, int &pass_audio_index) {
+    std::string json = PiEar::get_file_contents(path);
+    nlohmann::json data = nlohmann::json::parse(json);
+    pass_audio_index = data["audio_index"];
+    return PiEar::process_array(data, "channels");
 }
 TEST(testPiEar, task_load) {
     auto cha = generate_channels(3);
     std::string full_path = std::filesystem::temp_directory_path().string() + DIRECTORY_SEPARATOR + "piear_test_save_load.json";
+    // If fullpath exists, delete it.
+    if (std::filesystem::exists(full_path)) {
+        std::filesystem::remove(full_path);
+    }
     auto task = PiEar::task(cha, full_path, 1);
     task.async_run_save_task();
     while (!std::filesystem::exists(full_path)) std::this_thread::yield();
     sleep(1);
-    std::vector<PiEar::channel *> *data = load_from_file(full_path);
-    ASSERT_EQ(cha->size(), data->size());
+    int received_audio_index;
+    std::vector<PiEar::channel *> *data = load_from_file(full_path, received_audio_index);
+    ASSERT_EQ(received_audio_index, -1);
     for (int _ = 0; _ < 2; _++) {
         ASSERT_EQ(cha->size(), data->size());
         for (unsigned i = 0; i < cha->size(); i++) {
@@ -34,12 +41,14 @@ TEST(testPiEar, task_load) {
             break;
         }
         generate_channels(2, cha);
+        task.audio_index = 11;
         sleep(2);
         for (auto channel: *data) {
             delete channel;
         }
         delete data;
-        data = load_from_file(full_path);
+        data = load_from_file(full_path, received_audio_index);
+        ASSERT_EQ(received_audio_index, 11);
     }
     task.async_stop_save_task();
     remove(full_path.c_str());
