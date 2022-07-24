@@ -9,6 +9,7 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
+#include <mutex>
 #include "channel.hpp"
 
 namespace PiEar {
@@ -54,11 +55,17 @@ namespace PiEar {
          * @param ec Error code
          */
         void server_loop(const boost::system::error_code&);
+        /**
+         * This is the function sends the click stream
+         * @param ec Error code
+         */
+        void send_click_stream();
         std::atomic<bool>* kill_server;           //!< Pointer to a bool that, when set to true, will kill the server
         std::atomic<bool>* click;                 //!< Pointer to the click
         boost::asio::ip::udp::endpoint endpoint_; //!< Endpoint to use
         boost::asio::ip::udp::socket socket_;     //!< Socket to use
         std::vector<channel*> *channels;          //!< Pointer to all channels
+        std::mutex mutex_;                        //!< Mutex to use
     };
 }
 #endif //PIEAR_SERVER_MULTICAST_SERVER_H

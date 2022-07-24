@@ -39,7 +39,7 @@ namespace PiEar {
          * @param bool enabled (default true)
          * @param buffer_size size of the buffer (default BUFFER_SIZE)
          */
-        channel(int pe_id, const std::string& c_name, bool en = true, int buffer_size = BUFFER_SIZE) :
+        explicit channel(int pe_id, const std::string& c_name = "", bool en = true, int buffer_size = BUFFER_SIZE) :
                 piear_id(pe_id), channel_name(base64_encode(c_name)), buffer(buffer_size * BUFFER_CHUNK_SIZE, BUFFER_CHUNK_SIZE) , enabled(en) {}
         /**
          * The default `std::string` conversion is to

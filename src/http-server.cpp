@@ -4,6 +4,7 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <iostream>
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <thread>
@@ -12,7 +13,7 @@
 #include "http-server.h"
 
 namespace PiEar {
-    void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm, const std::string& ws_secret, int delay) {
+    void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm, const std::string& ws_secret, int delay, const std::vector<PiEar::audioDevice>& devices, std::atomic<int> *device_index, std::atomic<bool> *new_audio_device) {
         // Start server thread
         int server_thread = fork();
         if (!server_thread) {
@@ -21,7 +22,7 @@ namespace PiEar {
             server_args.push_back(const_cast<char*>(ws_secret.c_str()));
             server_args.push_back(nullptr);
             char **command = server_args.data();
-            execve("/usr/share/piear/webserver/src/PiEar_HTTP_Server.js", &command[0], nullptr);
+            execve((server_executable_dir() + "src/PiEar_HTTP_Server.js").c_str(), &command[0], nullptr);
             return; // Redundant
         }
         sleep(delay);
@@ -48,33 +49,34 @@ namespace PiEar {
         for (auto &chan : *channels) {
             ws.write(boost::asio::buffer(std::string(*chan)));
         }
-        std::stringstream bpm_string;
-        bpm_string << "{\"bpm\":" << *bpm << "}";
-        ws.write(boost::asio::buffer(bpm_string.str()));
+        for (const auto& device: devices) {
+            std::stringstream device_string;
+            device_string << R"({"device": { "index":)" << device.index << R"(, "channels":)" << device.channels << R"(, "name":")" << device.name << "\"}}";
+            ws.write(boost::asio::buffer(device_string.str()));
+        }
+        std::stringstream final_string;
+        final_string << "{\"bpm\":" << *bpm << ", \"active_device\":" << *device_index << "}";
+        ws.write(boost::asio::buffer(final_string.str()));
 
         std::thread kill_server_thread(kill_server_waiter, server_thread, kill_switch);
         while (!*kill_switch) {
             try {
                 stream_buffer.clear();
                 ws.read_some(stream_buffer, ws.read_message_max());
-            } catch(std::exception const& e) {}
-            try {
                 std::ostringstream os;
                 os << boost::beast::make_printable(stream_buffer.data());
                 std::string input_string = os.str();
                 nlohmann::json json_parsed = nlohmann::json::parse(input_string);
-                if ((json_parsed)["piear_id"].empty()) {
-                    if (!(json_parsed)["bpm"].empty()) {
-                        *bpm =  (json_parsed)["bpm"];
-                    }
-                } else {
-                    if ((json_parsed)["piear_id"].empty()) {
-                        continue;
-                    }
+                if (!json_parsed["bpm"].empty()) {
+                    *bpm = json_parsed["bpm"];
+                } else if (!json_parsed["device"].empty()) {
+                    *device_index = json_parsed["device"];
+                    *new_audio_device = true;
+                } else if (!json_parsed["piear_id"].empty()){
                     for (auto & chan : *channels) {
-                        if (chan->piear_id == (json_parsed)["piear_id"]) {
-                            if (!(json_parsed)["channel_name"].empty()) {
-                                chan->channel_name = (json_parsed)["channel_name"];
+                        if (chan->piear_id == json_parsed["piear_id"]) {
+                            if (!json_parsed["channel_name"].empty()) {
+                                chan->channel_name = json_parsed["channel_name"];
                             }
                         }
                     }
@@ -83,9 +85,19 @@ namespace PiEar {
         }
         kill_server_thread.join();
     }
-
     void kill_server_waiter(int to_kill, std::atomic<bool> *kill_server) {
         while (!*kill_server) std::this_thread::yield();
         kill(to_kill, SIGTERM);
+    }
+    std::string server_executable_dir() {
+        std::string local_location = "../webserver/";
+        std::string remote_location = "/usr/share/piear/webserver/";
+        if (std::ifstream(local_location).good()) {
+            return local_location;
+        } else if (std::ifstream(remote_location).good()) {
+            return remote_location;
+        }
+        std::cout << "Could not find server executable" << std::endl;
+        exit(1);
     }
 }
