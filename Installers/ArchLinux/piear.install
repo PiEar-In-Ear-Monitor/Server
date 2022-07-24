@@ -1,6 +1,0 @@
-post_install() {
-    if ! id "piear" &>/dev/null; then
-        useradd -c "User for piear" -M -r piear
-    fi
-    chown piear -R /usr/share/piear
-}

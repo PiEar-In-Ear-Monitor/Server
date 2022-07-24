@@ -16,7 +16,7 @@ conflicts=()
 replaces=()
 backup=()
 options=()
-install=$pkgname.install
+install=
 changelog=
 source=("$pkgname-$pkgver.tar.gz::https://github.com/PiEar-In-Ear-Monitor/Server/archive/refs/tags/v$pkgver.tar.gz")
 noextract=()
@@ -35,8 +35,6 @@ package() {
     cd "$pkgname"
     npm --prefix webserver install
     cmake --install build --prefix $pkgdir/usr
-    mkdir -p $pkgdir/usr/share/licenses/piear
-    cp LICENSE $pkgdir/usr/share/licenses/piear/LICENSE-MIT
-    mkdir -p $pkgdir/lib/systemd/service
-    cp Installers/ArchLinux/piear.service $pkgdir/lib/systemd/service
+    install -Dm 644 "LICENSE" "$pkgdir/usr/share/licenses/piear/LICENSE-MIT"
+    install -Dm 644 "Installers/ArchLinux/piear.service" "${pkgdir}/usr/lib/systemd/user/piear.service"
 }

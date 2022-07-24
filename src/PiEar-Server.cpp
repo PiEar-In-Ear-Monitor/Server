@@ -1,7 +1,8 @@
 #include <atomic>
 #include <iostream>
-#include <random>
 #include <portaudio.h>
+#include <random>
+#include <csignal>
 #include <thread>
 #include "audio.h"
 #include "channel.hpp"
@@ -10,8 +11,11 @@
 #include "multicast-server.h"
 #include "task.hpp"
 
-#define PIEAR_SETTINGS_FILE "piear_settings.json"
-#define PIEAR_SETTINGS_DIRECTORY "/usr/share/piear"
+// For getting the home directory.
+#include <pwd.h>
+#include <unistd.h>
+
+#define PIEAR_SETTINGS_FILE ".config/piear/piear_settings.json"
 
 std::string random_string(std::size_t length) {
     const std::string CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -24,12 +28,20 @@ std::string random_string(std::size_t length) {
     }
     return random_string;
 }
+
+bool SIG_HANDLER_KILL_SERVER = false;
+
 int main(int argc, char *argv[]) {
     // Click
-    std::atomic<bool> click = false, kill_audio = false, kill_click = false, kill_http = false, kill_multicast = false, kill_signal = false, change_audio_source = false;
+    std::atomic<bool> click = false, kill_audio = false, kill_click = false, kill_http = false, kill_multicast = false, change_audio_source = false;
     std::atomic<int> cpm = 100, audio_index = 0;
     std::vector<PiEar::channel*> channels;
-    std::string filename = PIEAR_SETTINGS_DIRECTORY;
+    std::string filename;
+    if (getenv("HOME") == nullptr) {
+        filename = getpwuid(getuid())->pw_dir;
+    } else {
+        filename = getenv("HOME");
+    }
     filename += PIEAR_SETTINGS_FILE;
     PiEar::task task = PiEar::task(&channels, filename, 3); // TODO: Change to 30
     audio_index = task.audio_index;
@@ -55,12 +67,8 @@ int main(int argc, char *argv[]) {
     std::thread click_thread(PiEar::mainloop_click, &cpm, &click, &kill_click);
     std::thread webserver_thread(PiEar::mainloop_http_server, &kill_http, &channels, &cpm, random_string(20), 1, info, &audio_index, &change_audio_source);
     std::thread multicast_thread(PiEar::mainloop_multicast_server, &channels, &click, &kill_multicast);
-    std::thread user_kill_thread([&kill_signal]() {
-        std::cout << "Press any key to exit..." << std::endl;
-        std::cin.get();
-        kill_signal = true;
-    });
-    while (!kill_signal) {
+    signal(SIGINT, [](int signum) { SIG_HANDLER_KILL_SERVER = true; });
+    while (!SIG_HANDLER_KILL_SERVER) {
         if (change_audio_source) {
             kill_audio = kill_http = kill_multicast = true;
             task.async_stop_save_task();
