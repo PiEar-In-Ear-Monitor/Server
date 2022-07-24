@@ -108,8 +108,8 @@ app.put("/devices", (req, res) => {
         return;
     }
     app.locals.device = id;
-    app.locals.wsConnection.send(JSON.stringify({device: app.locals.device}));
     res.status(200).json({device: app.locals.device});
+    app.locals.wsConnection.send(JSON.stringify({device: app.locals.device}));
 });
 
 app.listen(9090);

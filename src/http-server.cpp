@@ -13,7 +13,7 @@
 #include "http-server.h"
 
 namespace PiEar {
-    void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm, const std::string& ws_secret, int delay, const std::vector<PiEar::audioDevice>& devices, int device_index) {
+    void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm, const std::string& ws_secret, int delay, const std::vector<PiEar::audioDevice>& devices, std::atomic<int> *device_index, std::atomic<bool> *new_audio_device) {
         // Start server thread
         int server_thread = fork();
         if (!server_thread) {
@@ -55,7 +55,7 @@ namespace PiEar {
             ws.write(boost::asio::buffer(device_string.str()));
         }
         std::stringstream final_string;
-        final_string << "{\"bpm\":" << *bpm << ", \"active_device\":" << device_index << "}";
+        final_string << "{\"bpm\":" << *bpm << ", \"active_device\":" << *device_index << "}";
         ws.write(boost::asio::buffer(final_string.str()));
 
         std::thread kill_server_thread(kill_server_waiter, server_thread, kill_switch);
@@ -63,17 +63,16 @@ namespace PiEar {
             try {
                 stream_buffer.clear();
                 ws.read_some(stream_buffer, ws.read_message_max());
-            } catch(std::exception const& e) {}
-            try {
                 std::ostringstream os;
                 os << boost::beast::make_printable(stream_buffer.data());
                 std::string input_string = os.str();
                 nlohmann::json json_parsed = nlohmann::json::parse(input_string);
-                if (json_parsed["piear_id"].empty()) {
-                    if (!json_parsed["bpm"].empty()) {
-                        *bpm = json_parsed["bpm"];
-                    }
-                } else {
+                if (!json_parsed["bpm"].empty()) {
+                    *bpm = json_parsed["bpm"];
+                } else if (!json_parsed["device"].empty()) {
+                    *device_index = json_parsed["device"];
+                    *new_audio_device = true;
+                } else if (!json_parsed["piear_id"].empty()){
                     for (auto & chan : *channels) {
                         if (chan->piear_id == json_parsed["piear_id"]) {
                             if (!json_parsed["channel_name"].empty()) {

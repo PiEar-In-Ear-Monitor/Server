@@ -10,11 +10,6 @@ namespace PiEar {
             num_channels(1),
             tmp_buffer((uint16_t*) malloc(sizeof(uint16_t) * FRAMES_PER_BUFFER)),
             audio_index(audio_index) {
-        int err = Pa_Initialize();
-        if( err != paNoError ){
-            // TODO: Log this error
-            throw std::runtime_error("PortAudio error initializing");
-        }
         if (this->audio_index < 0 || this->audio_index >= Pa_GetDeviceCount()) {
             this->audio_index = Pa_GetDefaultInputDevice();
         }
@@ -63,7 +58,6 @@ namespace PiEar {
             // TODO: Log this error
             throw std::runtime_error("PortAudio error closing stream");
         }
-        Pa_Terminate();
     }
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "ConstantFunctionResult"

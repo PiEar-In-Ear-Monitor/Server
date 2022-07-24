@@ -18,8 +18,9 @@ namespace PiEar {
      * @param int This is the delay after starting the server to wait before initializing it.
      * @param std::vector<PiEar::audioDevice> This is the vector of audio devices to use.
      * @param int This is the index of the audio device to use.
+     * @param std::atomic<bool> This is an indicator of a changed audio index
      */
-    void mainloop_http_server(std::atomic<bool>*, std::vector<channel*>*, std::atomic<int>*, const std::string&, int, const std::vector<audioDevice>&, int);
+    void mainloop_http_server(std::atomic<bool>*, std::vector<channel*>*, std::atomic<int>*, const std::string&, int, const std::vector<audioDevice>&, std::atomic<int>*, std::atomic<bool>*);
     /**
      * @brief This is used to kill the server thread.
      * @param int This is the pid of the server thread

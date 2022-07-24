@@ -1,6 +1,7 @@
 #ifndef PIEAR_SERVER_TASK_HPP
 #define PIEAR_SERVER_TASK_HPP
 
+#include <atomic>
 #include <chrono>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -15,7 +16,7 @@ namespace PiEar {
     public:
         std::vector<PiEar::channel *> *channels; //!< Channels to save
         std::string file_path;                   //!< File path to save to
-        bool kill_task;                          //!< When set true, the task will not reschedule itself
+        std::atomic<bool> kill_task;                          //!< When set true, the task will not reschedule itself
         std::thread save_task_thread;            //!< Thread to run the task on
         bool is_running;                         //!< Is the task running?
         int save_interval;                       //!< How often to save the channels
@@ -45,7 +46,7 @@ namespace PiEar {
          *      [
          *          {
          *              "piear_id": <int>,
-         *              "channel": <string>,
+         *              "channel_name": <string>,
          *              "enabled": <bool>
          *          },
          *          ...
@@ -53,7 +54,7 @@ namespace PiEar {
          * }
          * @return std::string representation of a JSON object
          */
-        [[nodiscard]] std::string create_json() const;
+        std::string create_json();
         /**
          * Task that saves `channels`
          */
@@ -74,7 +75,10 @@ namespace PiEar {
             start_time = std::chrono::system_clock::now();
         }
     }
-    std::string task::create_json() const {
+//    This function cannot be const
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-make-member-function-const"
+    std::string task::create_json() {
         std::ostringstream s;
         s << "{\"channels\":[";
         for (auto it = std::begin(*this->channels); it != std::end(*this->channels); it++) {
@@ -86,6 +90,7 @@ namespace PiEar {
         s << "],\"audio_index\":" << this->audio_index << "}";
         return s.str();
     }
+#pragma clang diagnostic pop
     void task::load_from_file() {
         std::ifstream fs;
         fs.open(this->file_path.c_str());
@@ -95,11 +100,11 @@ namespace PiEar {
             fs.close();
             auto json_obj = nlohmann::json::parse(json_file_contents);
             for (int i = 0; i < this->channels->size(); i++) {
-                if (json_obj["channels"].size() < i) {
-                    this->channels->at(i)->channel_name = json_obj["channels"][i]["channel"];
+                if (i < json_obj["channels"].size()) {
+                    this->channels->at(i)->channel_name = json_obj["channels"][i]["channel_name"];
                     this->channels->at(i)->enabled = json_obj["channels"][i]["enabled"];
                 } else {
-                    this->channels->at(i)->channel_name = "Channel " + std::to_string(i);
+                    this->channels->at(i)->channel_name = PiEar::channel::base64_encode("Channel " + std::to_string(this->channels->at(i)->piear_id));
                     this->channels->at(i)->enabled = true;
                 }
             }
@@ -119,21 +124,24 @@ namespace PiEar {
             fs.close();
             this->audio_index = -1;
             for (int i = 0; i < this->channels->size(); i++) {
-                this->channels->at(i)->channel_name = "Channel " + std::to_string(i);
+                this->channels->at(i)->channel_name = PiEar::channel::base64_encode("Channel " + std::to_string(i));
                 this->channels->at(i)->enabled = true;
             }
         }
     }
     void task::async_run_save_task() {
         if (!this->is_running) {
+            this->kill_task = false;
             this->is_running = true;
             save_task_thread = std::thread(save_task, this);
         }
     }
     void task::async_stop_save_task() {
-        this->kill_task = true;
-        save_task_thread.join();
-        this->is_running = false;
+        if (this->is_running) {
+            this->kill_task = true;
+            save_task_thread.join();
+            this->is_running = false;
+        }
     }
 }
 

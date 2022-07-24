@@ -65,7 +65,7 @@ paths:
             application/json:
               schema:
                 type: object
-      parameters: 
+      parameters:
         - in: query
           name: bpm
           schema:
@@ -78,3 +78,30 @@ paths:
             type: boolean
           required: false
           description: new bpm
+  /devices:
+    description: Get the list of audio devices, and set the active one
+    get:
+      description: Get audio devices
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+    put:
+      description: Set the active audio device
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: index, as provided by the get
