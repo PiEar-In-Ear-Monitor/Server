@@ -51,6 +51,7 @@ TEST(testPiEar, task_load) {
         ASSERT_EQ(received_audio_index, 11);
     }
     task.async_stop_save_task();
+    std::cout << "State: " << (task.is_running ? "True" : "False") << std::endl;
     remove(full_path.c_str());
     for (auto channel: *cha) {
         delete channel;
