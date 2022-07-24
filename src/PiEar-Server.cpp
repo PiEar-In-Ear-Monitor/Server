@@ -11,7 +11,7 @@
 #include "task.hpp"
 
 #define PIEAR_SETTINGS_FILE "piear_settings.json"
-#define PIEAR_SETTINGS_DIRECTORY "/etc/piear/"
+#define PIEAR_SETTINGS_DIRECTORY "/usr/share/piear"
 
 std::string random_string(std::size_t length) {
     const std::string CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

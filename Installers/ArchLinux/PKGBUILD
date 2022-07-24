@@ -1,6 +1,6 @@
 # Maintainer: Alex O'Connor <Alex.nderOConnor@gmail.com>
 pkgname=piear
-pkgver=0.5.0
+pkgver=0.6.0
 pkgrel=1
 pkgdesc="A Software based in-ear solution"
 arch=('x86_64')
@@ -16,25 +16,21 @@ conflicts=()
 replaces=()
 backup=()
 options=()
-install=
+install=$pkgname.install
 changelog=
-source=("$pkgname-$pkgver.tar.gz::https://github.com/PiEar-In-Ear-Monitor/Server/archive/refs/tags/v0.5.0.tar.gz")
+source=("$pkgname-$pkgver.tar.gz::https://github.com/PiEar-In-Ear-Monitor/Server/archive/refs/tags/v$pkgver.tar.gz")
 noextract=()
-sha256sums=("ce0173b5d9c0d112dcd89bbf8cdf53024da4039d4db1daceb22431908c8b97b8")
+sha256sums=(SKIP)
 validpgpkeys=()
-
 prepare() {
     tar -xvf "$pkgname-$pkgver.tar.gz"
     mv "Server-$pkgver/" "$pkgname"
 }
-
 build() {
     cd "$pkgname"
-    [[ -d build ]] && rm -r build
     cmake -DCMAKE_INSTALL_PREFIX=/usr -DPACKAGE_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -B build
     cmake --build build
 }
-
 package() {
     cd "$pkgname"
     npm --prefix webserver install
@@ -42,5 +38,5 @@ package() {
     mkdir -p $pkgdir/usr/share/licenses/piear
     cp LICENSE $pkgdir/usr/share/licenses/piear/LICENSE-MIT
     mkdir -p $pkgdir/lib/systemd/service
-    cp piear.service $pkgdir/lib/systemd/service
+    cp Installers/ArchLinux/piear.service $pkgdir/lib/systemd/service
 }

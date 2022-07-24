@@ -1,0 +1,12 @@
+[Unit]
+Description=PiEar Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=piear
+ExecStart=/usr/bin/piear
+
+[Install]
+WantedBy=multi-user.target
