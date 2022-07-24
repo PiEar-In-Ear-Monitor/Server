@@ -8,8 +8,8 @@
 #include "http-server.h"
 
 TEST(testPiEar, http_server) {
-    std::atomic<bool> kill = false;
-    std::atomic<int> bpm = 100;
+    std::atomic<bool> kill = false, new_audio_index = false;
+    std::atomic<int> bpm = 100, audio_index = 0;
     std::vector<PiEar::channel*> *channels = generate_channels(5);
     std::vector<PiEar::audioDevice> devices;
     PiEar::audioDevice device;
@@ -17,7 +17,7 @@ TEST(testPiEar, http_server) {
     device.channels = 2;
     device.index = 0;
     devices.push_back(device);
-    std::thread server(PiEar::mainloop_http_server, &kill, channels, &bpm, "ws_test", 2, devices, 0);
+    std::thread server(PiEar::mainloop_http_server, &kill, channels, &bpm, "ws_test", 2, devices, &audio_index, &new_audio_index);
     sleep(1);
     int node_thread = fork();
     if (!node_thread) {
