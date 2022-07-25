@@ -11,10 +11,11 @@
 #include <vector>
 #include "channel.hpp"
 #include "http-server.h"
+#include "logger.h"
 
 namespace PiEar {
     void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm, const std::string& ws_secret, int delay, const std::vector<PiEar::audioDevice>& devices, std::atomic<int> *device_index, std::atomic<bool> *new_audio_device) {
-        // Start server thread
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Starting HTTP server thread...";
         int server_thread = fork();
         if (!server_thread) {
             std::vector<char*> server_args;
@@ -31,21 +32,16 @@ namespace PiEar {
         boost::asio::io_context ioc;
         boost::asio::ip::tcp::resolver resolver{ioc};
         boost::beast::websocket::stream<boost::asio::ip::tcp::socket> ws{ioc};
-        // Connect to server thread
-        host += ':' + std::to_string(boost::asio::connect(ws.next_layer(), resolver.resolve(host, port)).port());
+        boost::asio::connect(ws.next_layer(), resolver.resolve(host, port));
         boost::beast::flat_buffer stream_buffer;
-
-
-        // Set a decorator to change the User-Agent of the handshake
         ws.set_option(boost::beast::websocket::stream_base::decorator(
             [ws_secret](boost::beast::websocket::request_type &req) {
-                    req.set(boost::beast::http::field::user_agent, "PiEar-Server-1.0");
-                    req.set("shared-secret", ws_secret);
-                }
-            ));
-
-        ws.handshake(host, "/");
-
+                req.set(boost::beast::http::field::user_agent, "PiEar-Server-1.0");
+                req.set("shared-secret", ws_secret);
+            }
+        ));
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Connecting to HTTP server...";
+        ws.handshake(host + ":" + port, "/");
         for (auto &chan : *channels) {
             ws.write(boost::asio::buffer(std::string(*chan)));
         }
@@ -59,14 +55,16 @@ namespace PiEar {
         ws.write(boost::asio::buffer(final_string.str()));
 
         std::thread kill_server_thread(kill_server_waiter, server_thread, kill_switch);
+        std::string input_string;
         while (!*kill_switch) {
             try {
                 stream_buffer.clear();
                 ws.read_some(stream_buffer, ws.read_message_max());
                 std::ostringstream os;
                 os << boost::beast::make_printable(stream_buffer.data());
-                std::string input_string = os.str();
+                input_string = os.str();
                 nlohmann::json json_parsed = nlohmann::json::parse(input_string);
+                PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Received message from HTTP server: " << json_parsed;
                 if (!json_parsed["bpm"].empty()) {
                     *bpm = json_parsed["bpm"];
                 } else if (!json_parsed["device"].empty()) {

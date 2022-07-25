@@ -3,8 +3,8 @@
 
 #include <atomic>
 #include <chrono>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <thread>
@@ -109,12 +109,16 @@ namespace PiEar {
                     this->channels->at(i)->enabled = true;
                 }
             }
+        } else {
+            for (auto & i : *this->channels) {
+                i->channel_name = PiEar::channel::base64_encode("Channel " + std::to_string(i->piear_id));
+                i->enabled = true;
+            }
         }
     }
     task::task(std::vector<PiEar::channel*> *c, std::string f, int save_pause)
             : channels(c), file_path(std::move(f)), kill_task(false), is_running(false), save_interval(save_pause) {
         std::ifstream fs;
-        // Check if file exists
         if (std::filesystem::exists(this->file_path)) {
             fs.open(this->file_path.c_str());
             if (fs.is_open()) {
