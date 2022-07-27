@@ -1,9 +1,9 @@
 #include <boost/asio.hpp>
-#include <boost/iostreams/copy.hpp>
 #include <boost/bind/bind.hpp>
 #include <iostream>
 #include <string>
 #include "channel.hpp"
+#include "logger.h"
 #include "multicast-server.h"
 
 namespace PiEar {
@@ -16,11 +16,12 @@ namespace PiEar {
         socket.set_option(boost::asio::socket_base::broadcast(true));
         socket.bind(endpoint);
         try {
+            PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Starting multicast server thread...";
             boost::asio::io_service io_service;
             MulticastServer s(io_service, boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP), kill, click, channels);
             io_service.run();
         } catch (std::exception& e) {
-            std::cerr << "Exception: " << e.what() << "\n";
+            PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Multicast server failed: " << e.what();
         }
     }
     PiEar::MulticastServer::MulticastServer(boost::asio::io_service& io_service, const boost::asio::ip::address& multicast_address, std::atomic<bool> *kill, std::atomic<bool> *click, std::vector<channel*> *channels):
@@ -32,8 +33,6 @@ namespace PiEar {
         auto data_with_channel = new uint16_t[channels->back()->buffer.chunkSize() + 1];
         while(!(*kill_server)) {
             for (auto channel : *channels) {
-//            for (int i = 0; i < 1; i++) {
-//                auto channel = channels->at(i);
                 if (channel->enabled) {
                     data_with_channel[0] = channel->piear_id;
                     uint16_t *data = channel->buffer.pop();

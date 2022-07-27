@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -67,7 +68,7 @@ namespace PiEar {
     void task::save_task(task *task) {
         auto start_time = std::chrono::system_clock::now();
         while (!task->kill_task) {
-            while (std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() < (task->save_interval));
+            while ((std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() < (task->save_interval)) && (!task->kill_task));
             std::ofstream fs;
             fs.open(task->file_path.c_str());
             fs << task->create_json();
@@ -108,25 +109,28 @@ namespace PiEar {
                     this->channels->at(i)->enabled = true;
                 }
             }
+        } else {
+            for (auto & i : *this->channels) {
+                i->channel_name = PiEar::channel::base64_encode("Channel " + std::to_string(i->piear_id));
+                i->enabled = true;
+            }
         }
     }
     task::task(std::vector<PiEar::channel*> *c, std::string f, int save_pause)
             : channels(c), file_path(std::move(f)), kill_task(false), is_running(false), save_interval(save_pause) {
         std::ifstream fs;
-        fs.open(this->file_path.c_str());
-        if (fs.is_open()) {
-            std::string json_file_contents;
-            std::getline(fs, json_file_contents);
-            fs.close();
-            auto json_obj = nlohmann::json::parse(json_file_contents);
-            this->audio_index = (json_obj.contains("audio_index") ? (int) json_obj["audio_index"] : -1);
-        } else {
-            fs.close();
-            this->audio_index = -1;
-            for (int i = 0; i < this->channels->size(); i++) {
-                this->channels->at(i)->channel_name = PiEar::channel::base64_encode("Channel " + std::to_string(i));
-                this->channels->at(i)->enabled = true;
+        if (std::filesystem::exists(this->file_path)) {
+            fs.open(this->file_path.c_str());
+            if (fs.is_open()) {
+                std::string json_file_contents;
+                std::getline(fs, json_file_contents);
+                fs.close();
+                auto json_obj = nlohmann::json::parse(json_file_contents);
+                this->audio_index = json_obj["audio_index"];
             }
+        } else {
+            this->audio_index = -1;
+            std::filesystem::create_directory(std::filesystem::path(this->file_path).parent_path());
         }
     }
     void task::async_run_save_task() {

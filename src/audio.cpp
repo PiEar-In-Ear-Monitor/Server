@@ -3,6 +3,7 @@
 #include <vector>
 #include "audio.h"
 #include "channel.hpp"
+#include "logger.h"
 
 namespace PiEar {
     Audio::Audio(std::atomic<bool> *_kill, std::vector<channel*> *channels, int audio_index):
@@ -19,6 +20,7 @@ namespace PiEar {
     }
     void Audio::audio_thread() {
         // Find out how many devices there are
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Loading audio device";
         const PaDeviceInfo* defaultDeviceInfo = Pa_GetDeviceInfo(audio_index);
         PaStream* stream;
         if (defaultDeviceInfo->maxInputChannels > channels->size()) {
@@ -32,6 +34,7 @@ namespace PiEar {
         in_params.hostApiSpecificStreamInfo = nullptr;
         in_params.sampleFormat = paInt16;
         in_params.suggestedLatency = 0;
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Opening audio stream";
         int err = Pa_OpenStream(
                 &stream,
                 &in_params,
@@ -42,12 +45,12 @@ namespace PiEar {
                 paCallback,
                 this);
         if( err != paNoError ) {
-            // TODO: Log this error
-            throw std::runtime_error("PortAudio error opening stream");
+            PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Error opening audio stream";
+            throw std::runtime_error("Error opening audio stream");
         }
         err = Pa_StartStream( stream );
         if( err != paNoError ) {
-            // TODO: Log this error
+            PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Error starting audio stream";
             throw std::runtime_error("PortAudio error starting stream");
         }
         while(!(*kill)){
@@ -55,7 +58,7 @@ namespace PiEar {
         }
         err = Pa_CloseStream( stream );
         if( err != paNoError ) {
-            // TODO: Log this error
+            PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Error closing audio stream";
             throw std::runtime_error("PortAudio error closing stream");
         }
     }

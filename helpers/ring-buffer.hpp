@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <mutex>
+#include "logger.h"
 
 namespace PiEar {
     /**
@@ -27,6 +28,7 @@ namespace PiEar {
                 _chunkCount(0),
                 _mutex() {
             if (_buffer == nullptr) {
+                PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Failed to allocate memory for ring buffer.";
                 throw std::bad_alloc();
             }
             memset(_buffer, 0, sizeof(T) * size_of_buffer);
@@ -46,7 +48,7 @@ namespace PiEar {
         void push(const T *item) {
             std::lock_guard<std::mutex> lock(_mutex);
             if (_chunkCount == capacity()) {
-                // TODO: Log this
+                PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::warning) << "Ring buffer is full, overwriting oldest chunk.";
                 _readIndex = (_readIndex + _chunkSize) % _size;
                 _chunkCount--;
             }
@@ -104,5 +106,5 @@ namespace PiEar {
         const int _chunkSize; //!< Size of each chunk.
         int _chunkCount;      //!< Number of chunks in the buffer.
     };
-} // PiEar
+}
 #endif //PIEAR_SERVER_RINGBUFFER_H
