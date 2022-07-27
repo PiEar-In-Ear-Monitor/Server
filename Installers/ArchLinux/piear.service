@@ -1,0 +1,10 @@
+[Unit]
+Description=PiEar Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/piear
+
+[Install]
+WantedBy=default.target

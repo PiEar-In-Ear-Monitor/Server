@@ -1,3 +1,4 @@
+#include <cmath>
 #include <gtest/gtest.h>
 #include <thread>
 #include "click.h"
@@ -29,7 +30,7 @@ TEST(testPiEar, test_click) {
     int cpms[] = {6000, 5000, 3000, 2000, 1000, 500, 300, 150, 120, 60};
     for (auto item : cpms){
         cpm = item;
-        EXPECT_NEAR(((double)cpm / (60.0 / (double)SLEEP_TIME)), run_test(&click), ((int)((double)cpm*MARGIN_OF_ERROR) + 0.5));
+        EXPECT_NEAR(((double)cpm / (60.0 / (double)SLEEP_TIME)), run_test(&click), ceil((int)((double)cpm*MARGIN_OF_ERROR) + 0.5));
     }
     end_click = true;
     click_thread.join();

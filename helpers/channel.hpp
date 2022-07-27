@@ -1,9 +1,9 @@
 #ifndef PIEAR_SERVER_CHANNEL_HPP
 #define PIEAR_SERVER_CHANNEL_HPP
 
-#define ADD_KEY_VAL_LIT(s, k, v) s << '"' << k << "\":" << v
-#define ADD_KEY_VAL_STR(s, k, v) s << '"' << k << "\":\"" << v << '"'
-#define COMMA(s) s << ','
+#define ADD_KEY_VAL_LIT(s, k, v) (s) << '"' << (k) << "\":" << (v)
+#define ADD_KEY_VAL_STR(s, k, v) (s) << '"' << (k) << "\":\"" << (v) << '"'
+#define COMMA(s) (s) << ','
 #define BUFFER_SIZE 10
 #define BUFFER_CHUNK_SIZE 128
 
