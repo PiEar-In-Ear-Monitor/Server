@@ -21,7 +21,7 @@ namespace PiEar {
          * @param s String to encode
          * @return Encoded string
          */
-        static std::string base64_encode(boost::beast::string_view s) {
+        static auto base64_encode(boost::beast::string_view s) -> std::string {
             auto data = reinterpret_cast < std::uint8_t const*> (s.data());
             std::size_t len = s.size();
             std::string dest;
@@ -77,7 +77,7 @@ namespace PiEar {
          * piear_id to the other int
          * @return bool `piear_id` == `int`
          */
-        bool operator==(int rhs) const {
+        auto operator==(int rhs) const -> bool {
             return piear_id == rhs;
         }
     };

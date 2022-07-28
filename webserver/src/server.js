@@ -133,9 +133,7 @@ function handleWs(ws) {
                 if (typeof json.piear_id !== "undefined" && typeof json.channel_name !== "undefined") {
                     app.locals.channels.push({piear_id: json.piear_id, channel_name: json.channel_name});
                 }
-            } catch (e) {
-                return;
-            }
+            } catch (e) {}
         }
     });
     ws.on("close", () => {

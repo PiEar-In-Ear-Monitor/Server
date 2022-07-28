@@ -2,18 +2,18 @@
 #define PIEAR_SERVER_AUDIO_H
 
 #define FRAMES_PER_BUFFER 128
+#define FINAL_SAMPLE_RATE 44100
 
 #include <atomic>
 #include <portaudio.h>
 #include <vector>
 #include "channel.hpp"
 
-// TODO: Expose the number of channels
 namespace PiEar {
     /**
      * @brief This routine is the PortAudio callback
      */
-    int paCallback( const void*, void*, unsigned long, const PaStreamCallbackTimeInfo*, PaStreamCallbackFlags, void* );
+    auto paCallback( const void*, void*, unsigned long, const PaStreamCallbackTimeInfo*, PaStreamCallbackFlags, void* ) -> int;
     /**
      * @brief This struct is used to get data for choosing a device.
      */
@@ -49,22 +49,39 @@ namespace PiEar {
          * @param
          * @return The number of channels.
          */
-        int channel_count(int);
+        auto channel_count(int) -> int;
         /**
          * @brief This is the class's PA handler.
          */
-        int classPaCallback( const uint16_t*);
+        auto classPaCallback( const uint16_t*) -> int;
         /**
          * @brief This function returns a std::vector of all channel names, indexes, and input channels
          * @return std::vector<std::string> A vector of channel names, indexes, and input channels.
          */
-        std::vector<audioDevice> get_audio_devices();
-        int audio_index; //!< The index of the audio channel to use.
+        auto get_audio_devices() -> std::vector<audioDevice>;
+        /**
+         * @brief This function returns the index of the audio device to use.
+         * @return int The index of the audio device to use.
+         */
+        void set_audio_device(int);
+        /**
+         * @brief This function returns the current audio device index.
+         * @return int The current audio device index.
+         */
+        [[nodiscard]] auto get_audio_index() const -> int;
     private:
+        int audio_index;                 //!< The index of the audio channel to use.
         std::vector<channel*>* channels; //!< The channels where the audio will be stored.
-        std::atomic<bool> *kill; //!< The kill flag.
-        int num_channels; //!< The number of channels.
-        uint16_t *tmp_buffer; //!< The temporary buffer.
+        std::atomic<bool> *kill;         //!< The kill flag.
+        int num_channels;                //!< The number of channels.
+        uint16_t *tmp_buffer;            //!< The temporary buffer.
+        int source_sample_rate = -1;     //!< The source sample rate.
+        /**
+         * @brief This function resamples the audio
+         * @param input The input buffer.
+         * @param output The output buffer.
+         */
+        void resample(const uint16_t*, uint16_t*);
     };
 }
 #endif //PIEAR_SERVER_AUDIO_H

@@ -1,6 +1,5 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
-#include <iostream>
 #include <string>
 #include "channel.hpp"
 #include "logger.h"
@@ -59,7 +58,9 @@ namespace PiEar {
                 mutex_.lock();
                 socket_.send_to(boost::asio::buffer(click_true, 2 * sizeof(uint16_t)), endpoint_);
                 mutex_.unlock();
-                while (*click);
+                while (*click) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                }
             }
         }
         delete[] click_true;

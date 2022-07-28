@@ -9,7 +9,9 @@
 #include "gen_channels.hpp"
 #include "multicast-server.h"
 
-#define MESSAGES_TO_SEND 5
+enum {
+MESSAGES_TO_SEND = 5
+};
 
 namespace PiEar::Test {
     class receiver {

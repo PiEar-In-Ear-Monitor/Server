@@ -79,15 +79,21 @@ namespace PiEar {
                         }
                     }
                 }
-            } catch (std::exception const &e) {}
+            } catch (std::exception const &e) {
+                if (!*kill_switch) {
+                    PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Error reading from HTTP server: " << e.what();
+                }
+            }
         }
         kill_server_thread.join();
     }
     void kill_server_waiter(int to_kill, std::atomic<bool> *kill_server) {
-        while (!*kill_server) std::this_thread::yield();
+        while (!*kill_server) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
         kill(to_kill, SIGTERM);
     }
-    std::string server_executable_dir() {
+    auto server_executable_dir() -> std::string {
         std::string local_location = "../webserver/";
         std::string remote_location = "/usr/share/piear/webserver/";
         if (std::ifstream(local_location).good()) {

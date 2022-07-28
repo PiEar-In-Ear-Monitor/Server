@@ -27,7 +27,7 @@ namespace PiEar {
      * @param std::string file_name
      * @return std::string contents of the file
      */
-    std::string get_file_contents(const std::string& view_path) {
+    auto get_file_contents(const std::string& view_path) -> std::string {
         constexpr auto read_size = std::size_t(4096);
         auto stream = std::ifstream(view_path, std::ios::binary);
         auto out = std::string();
@@ -45,7 +45,7 @@ namespace PiEar {
      * @param key key under which the channels are stored
      * @return pointer to the vector of channels
      */
-    std::vector<channel*> *process_array(nlohmann::json &data,  const std::string& key) {
+    auto process_array(nlohmann::json &data,  const std::string& key) -> std::vector<channel*> * {
         auto *channel_vector = new std::vector<channel*>();
         for (const auto& channel : data[key]){
             auto *new_channel = new PiEar::channel(channel["piear_id"], "", channel["enabled"]);

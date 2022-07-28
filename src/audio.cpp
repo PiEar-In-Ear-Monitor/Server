@@ -1,5 +1,10 @@
 #include <iostream>
+#include <libavutil/opt.h>
+#include <libavutil/channel_layout.h>
+#include <libavutil/samplefmt.h>
+#include <libswresample/swresample.h>
 #include <portaudio.h>
+#include <thread>
 #include <vector>
 #include "audio.h"
 #include "channel.hpp"
@@ -11,15 +16,12 @@ namespace PiEar {
             num_channels(1),
             tmp_buffer((uint16_t*) malloc(sizeof(uint16_t) * FRAMES_PER_BUFFER)),
             audio_index(audio_index) {
-        if (this->audio_index < 0 || this->audio_index >= Pa_GetDeviceCount()) {
-            this->audio_index = Pa_GetDefaultInputDevice();
-        }
+        set_audio_device(audio_index);
     }
     Audio::~Audio() {
         free(tmp_buffer);
     }
     void Audio::audio_thread() {
-        // Find out how many devices there are
         PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Loading audio device";
         const PaDeviceInfo* defaultDeviceInfo = Pa_GetDeviceInfo(audio_index);
         PaStream* stream;
@@ -54,7 +56,7 @@ namespace PiEar {
             throw std::runtime_error("PortAudio error starting stream");
         }
         while(!(*kill)){
-            Pa_Sleep(100);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
         err = Pa_CloseStream( stream );
         if( err != paNoError ) {
@@ -64,7 +66,7 @@ namespace PiEar {
     }
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "ConstantFunctionResult"
-    int paCallback( const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData ) {
+    auto paCallback( const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData ) -> int {
         (void) outputBuffer; // Prevent unused variable warnings
         (void) timeInfo; // Prevent unused variable warnings
         (void) statusFlags; // Prevent unused variable warnings
@@ -72,7 +74,7 @@ namespace PiEar {
         return ((Audio*)userData)->classPaCallback((uint16_t *)inputBuffer);
     }
 #pragma clang diagnostic pop
-    int Audio::classPaCallback(const uint16_t *inputBuffer) {
+    auto Audio::classPaCallback(const uint16_t *inputBuffer) -> int {
         for (int i = 0; i < num_channels; i++) {
             if (!channels->at(i)->enabled) {
                 continue;
@@ -87,10 +89,10 @@ namespace PiEar {
 // This is because `Pa_Initialize()` needs to be called before anything can be done with PortAudio.
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "readability-convert-member-functions-to-static"
-    int Audio::channel_count(int audio_index_to_check) {
+    auto Audio::channel_count(int audio_index_to_check) -> int {
         return Pa_GetDeviceInfo(audio_index_to_check)->maxInputChannels;
     }
-    std::vector<audioDevice> Audio::get_audio_devices() {
+    auto Audio::get_audio_devices() -> std::vector<audioDevice> {
         std::vector<audioDevice> devices;
         int numDevices = Pa_GetDeviceCount();
         for( int i = 0; i < numDevices; i++ ) {
@@ -104,4 +106,19 @@ namespace PiEar {
         return devices;
     }
 #pragma clang diagnostic pop
+
+    void Audio::set_audio_device(int index) {
+        if (this->audio_index < 0 || this->audio_index >= Pa_GetDeviceCount()) {
+            this->audio_index = Pa_GetDefaultInputDevice();
+        } else {
+            this->audio_index = index;
+        }
+    }
+    auto Audio::get_audio_index() const -> int {
+        return audio_index;
+    }
+    void Audio::resample(const uint16_t *source, uint16_t *output) {
+        // Use ffmpeg to resample the audio
+
+    }
 }
