@@ -9,7 +9,7 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include "channel.hpp"
+#include "channel.h"
 #include "http-server.h"
 #include "logger.h"
 
@@ -80,6 +80,7 @@ namespace PiEar {
                     }
                 }
             } catch (std::exception const &e) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1100));
                 if (!*kill_switch) {
                     PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Error reading from HTTP server: " << e.what();
                 }
@@ -95,7 +96,7 @@ namespace PiEar {
     }
     auto server_executable_dir() -> std::string {
         std::string local_location = "../webserver/";
-        std::string remote_location = "/usr/share/piear/webserver/";
+        std::string remote_location = "/usr/share/piear/webserver/"; // TODO: Make this cross-platform
         if (std::ifstream(local_location).good()) {
             return local_location;
         } else if (std::ifstream(remote_location).good()) {

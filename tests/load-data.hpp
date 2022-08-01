@@ -20,7 +20,7 @@
 #include <nlohmann/json.hpp>
 #include <utility>
 #include <vector>
-#include "channel.hpp"
+#include "channel.h"
 namespace PiEar {
     /**
      * @brief Loads the data from a file

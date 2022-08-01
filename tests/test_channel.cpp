@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <string>
-#include "channel.hpp"
+#include "channel.h"
 #include "gen_channels.hpp"
 
 TEST(testPiEar, channel_basic_usage) {

@@ -1,7 +1,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
 #include <string>
-#include "channel.hpp"
+#include "channel.h"
 #include "logger.h"
 #include "multicast-server.h"
 
@@ -29,19 +29,18 @@ namespace PiEar {
     }
     void PiEar::MulticastServer::server_loop(const boost::system::error_code& error) {
         std::thread send_click_stream_thread([this] {send_click_stream();});
-        auto data_with_channel = new uint16_t[channels->back()->buffer.chunkSize() + 1];
+        auto data_with_channel = new uint16_t[BUFFER_CHUNK_SIZE + 1];
         while(!(*kill_server)) {
             for (auto channel : *channels) {
                 if (channel->enabled) {
                     data_with_channel[0] = channel->piear_id;
-                    uint16_t *data = channel->buffer.pop();
-                    if (data == nullptr) {
+                    PiEar::return_data data = channel->get_sample();
+                    if (data.data == nullptr) {
                         continue;
                     }
-                    memcpy(data_with_channel + 1, data, sizeof(uint16_t) * (channel->buffer.chunkSize()));
-                    free(data);
+                    memcpy(data_with_channel + 1, data.data, sizeof(uint16_t) * data.frames);
                     mutex_.lock();
-                    socket_.send_to(boost::asio::buffer(data_with_channel, sizeof(uint16_t) * (channel->buffer.chunkSize() + 1)), endpoint_);
+                    socket_.send_to(boost::asio::buffer(data_with_channel, sizeof(uint16_t) * (BUFFER_CHUNK_SIZE + 1)), endpoint_);
                     mutex_.unlock();
                 }
             }

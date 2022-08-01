@@ -4,7 +4,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include "channel.hpp"
+#include "channel.h"
 #include "gen_channels.hpp"
 #include "load-data.hpp"
 #include "task.hpp"

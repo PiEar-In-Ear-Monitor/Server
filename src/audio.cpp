@@ -1,20 +1,16 @@
 #include <iostream>
-#include <libavutil/opt.h>
-#include <libavutil/channel_layout.h>
-#include <libavutil/samplefmt.h>
-#include <libswresample/swresample.h>
 #include <portaudio.h>
 #include <thread>
 #include <vector>
 #include "audio.h"
-#include "channel.hpp"
+#include "channel.h"
 #include "logger.h"
 
 namespace PiEar {
     Audio::Audio(std::atomic<bool> *_kill, std::vector<channel*> *channels, int audio_index):
             kill(_kill), channels(channels),
             num_channels(1),
-            tmp_buffer((uint16_t*) malloc(sizeof(uint16_t) * FRAMES_PER_BUFFER)),
+            tmp_buffer((uint16_t*) malloc(sizeof(uint16_t) * BUFFER_CHUNK_SIZE)),
             audio_index(audio_index) {
         set_audio_device(audio_index);
     }
@@ -30,6 +26,10 @@ namespace PiEar {
         } else {
             num_channels = defaultDeviceInfo->maxInputChannels;
         }
+        source_sample_rate = defaultDeviceInfo->defaultSampleRate;
+        for ( auto channel : *channels ) {
+            channel->setup_swr_ctx(source_sample_rate);
+        }
         PaStreamParameters in_params;
         in_params.device = this->audio_index;
         in_params.channelCount = num_channels;
@@ -41,8 +41,8 @@ namespace PiEar {
                 &stream,
                 &in_params,
                 nullptr,
-                defaultDeviceInfo->defaultSampleRate,
-                FRAMES_PER_BUFFER,
+                source_sample_rate,
+                BUFFER_CHUNK_SIZE,
                 paClipOff,
                 paCallback,
                 this);
@@ -67,10 +67,10 @@ namespace PiEar {
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "ConstantFunctionResult"
     auto paCallback( const void *inputBuffer, void *outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData ) -> int {
-        (void) outputBuffer; // Prevent unused variable warnings
-        (void) timeInfo; // Prevent unused variable warnings
-        (void) statusFlags; // Prevent unused variable warnings
-        (void) framesPerBuffer ; // Prevent unused variable warnings
+        (void) outputBuffer;    // Prevent unused variable warnings
+        (void) timeInfo;        // Prevent unused variable warnings
+        (void) statusFlags;     // Prevent unused variable warnings
+        (void) framesPerBuffer; // Prevent unused variable warnings
         return ((Audio*)userData)->classPaCallback((uint16_t *)inputBuffer);
     }
 #pragma clang diagnostic pop
@@ -79,10 +79,10 @@ namespace PiEar {
             if (!channels->at(i)->enabled) {
                 continue;
             }
-            for (int j = 0; j < FRAMES_PER_BUFFER; j++) {
+            for (int j = 0; j < BUFFER_CHUNK_SIZE; j++) {
                 tmp_buffer[j] = inputBuffer[num_channels*j+i];
             }
-            channels->at(i)->buffer.push(tmp_buffer);
+            channels->at(i)->add_sample(tmp_buffer);
         }
         return 0;
     }
@@ -116,9 +116,5 @@ namespace PiEar {
     }
     auto Audio::get_audio_index() const -> int {
         return audio_index;
-    }
-    void Audio::resample(const uint16_t *source, uint16_t *output) {
-        // Use ffmpeg to resample the audio
-
     }
 }

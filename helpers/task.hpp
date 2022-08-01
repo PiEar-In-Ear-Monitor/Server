@@ -10,7 +10,7 @@
 #include <thread>
 #include <utility>
 #include <vector>
-#include "channel.hpp"
+#include "channel.h"
 
 namespace PiEar {
     class task {
@@ -21,7 +21,7 @@ namespace PiEar {
         std::thread save_task_thread;            //!< Thread to run the task on
         bool is_running = false;                 //!< Is the task running?
         int save_interval;                       //!< How often to save the channels
-        int audio_index;                         //!< Index of the audio channel to use
+        std::atomic<int> *audio_index;           //!< Index of the audio channel to use
         /**
          * function that initializes `save_task` for its
          * first run, also loads audio_index.
@@ -30,8 +30,9 @@ namespace PiEar {
          * of pointers to PiEar::channel objects.
          * @param std::string file_path to save file
          * @param int Is the time between writing to the save file
+         * @param std::atomic<int>* Is a pointer to an atomic integer
          */
-        task(std::vector<PiEar::channel *> *c, std::string f, int save_pause);
+        task(std::vector<PiEar::channel *> *c, std::string f, int save_pause, std::atomic<int> *ai);
         /**
          * function begins the task
          */
@@ -88,7 +89,7 @@ namespace PiEar {
                 s << ',';
             }
         }
-        s << "],\"audio_index\":" << this->audio_index << "}";
+        s << "],\"audio_index\":" << *(this->audio_index) << "}";
         return s.str();
     }
     void task::load_from_file() {
@@ -116,8 +117,8 @@ namespace PiEar {
         }
     }
 #pragma clang diagnostic pop
-    task::task(std::vector<PiEar::channel*> *c, std::string f, int save_pause)
-            : channels(c), file_path(std::move(f)), save_interval(save_pause) {
+    task::task(std::vector<PiEar::channel*> *c, std::string f, int save_pause, std::atomic<int> *ai)
+            : channels(c), file_path(std::move(f)), save_interval(save_pause), audio_index(ai) {
         std::ifstream fs;
         if (std::filesystem::exists(this->file_path)) {
             fs.open(this->file_path.c_str());
@@ -126,10 +127,10 @@ namespace PiEar {
                 std::getline(fs, json_file_contents);
                 fs.close();
                 auto json_obj = nlohmann::json::parse(json_file_contents);
-                this->audio_index = json_obj["audio_index"];
+                *(this->audio_index) = json_obj["audio_index"];
             }
         } else {
-            this->audio_index = -1;
+            *(this->audio_index) = -1;
             std::filesystem::create_directory(std::filesystem::path(this->file_path).parent_path());
         }
     }

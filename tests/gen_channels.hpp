@@ -3,7 +3,7 @@
 
 #include <random>
 #include <vector>
-#include "channel.hpp"
+#include "channel.h"
 
 void generate_channels(int number_of_channels, std::vector<PiEar::channel*> *current_vector) {
     for (int i = 0; i < number_of_channels; ++i) {

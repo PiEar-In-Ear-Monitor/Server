@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include "audio.h"
-#include "channel.hpp"
+#include "channel.h"
 
 namespace PiEar {
     /**

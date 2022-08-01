@@ -1,13 +1,10 @@
 #ifndef PIEAR_SERVER_AUDIO_H
 #define PIEAR_SERVER_AUDIO_H
 
-#define FRAMES_PER_BUFFER 128
-#define FINAL_SAMPLE_RATE 44100
-
 #include <atomic>
 #include <portaudio.h>
 #include <vector>
-#include "channel.hpp"
+#include "channel.h"
 
 namespace PiEar {
     /**
@@ -76,12 +73,6 @@ namespace PiEar {
         int num_channels;                //!< The number of channels.
         uint16_t *tmp_buffer;            //!< The temporary buffer.
         int source_sample_rate = -1;     //!< The source sample rate.
-        /**
-         * @brief This function resamples the audio
-         * @param input The input buffer.
-         * @param output The output buffer.
-         */
-        void resample(const uint16_t*, uint16_t*);
     };
 }
 #endif //PIEAR_SERVER_AUDIO_H
