@@ -40,26 +40,26 @@ auto PiEar::channel::add_sample(uint16_t *sample) -> void {
     buffer.push(sample);
 }
 auto PiEar::channel::get_sample() -> return_data {
+    uint16_t *sample = buffer.pop();
+    if (sample == nullptr) {
+        return return_data{nullptr, 0};
+    }
     auto *converted_sample = (uint16_t *) malloc(sizeof(uint16_t) * this->converted_sample_max); // TODO: Make some buffer pool for less malloc?
     if (converted_sample == nullptr) {
         PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Failed to allocate memory for converted sample";
         throw std::runtime_error("Failed to allocate memory for converted sample");
     }
-    uint16_t *sample = buffer.pop();
-    if (sample == nullptr) {
-        free(converted_sample);
-        return return_data{nullptr, 0};
-    }
     if (swr_ctx == nullptr) {
+        free(converted_sample);
         PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "swr_ctx is not initialized";
         throw std::runtime_error("swr_ctx is not initialized");
     }
-    int frames = swr_convert(swr_ctx, (uint8_t **)&converted_sample, BUFFER_CHUNK_SIZE, (const uint8_t **)&sample, BUFFER_CHUNK_SIZE);
+    int frames = swr_convert(swr_ctx, (uint8_t **)&converted_sample, this->converted_sample_max, (const uint8_t **)&sample, BUFFER_CHUNK_SIZE);
     free(sample);
     if (frames < 0) {
-        PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "no frames converted";
         free(converted_sample);
-        return return_data{nullptr, 0};
+        PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "no frames converted";
+        throw std::runtime_error("no frames converted");
     }
     return return_data{converted_sample, frames};
 }
