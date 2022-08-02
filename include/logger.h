@@ -13,14 +13,8 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //******************************************************************************
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/sinks/text_file_backend.hpp>
-#include <boost/log/utility/setup/console.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/sources/severity_logger.hpp>
-#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/trivial.hpp>
 
 #ifndef PIEAR_SERVER_LOGGER_H
 #define PIEAR_SERVER_LOGGER_H
@@ -34,7 +28,11 @@
 #endif
 
 namespace PiEar::Logger {
-    extern boost::log::sources::severity_logger< boost::log::trivial::severity_level > lg;
+    [[maybe_unused]] extern boost::log::sources::severity_logger< boost::log::trivial::severity_level > lg; //!< The logger
+    /**
+     * @brief Initialise the logger
+     * @param log_level defaults to info
+     */
     void init( int log_level = boost::log::trivial::info );
 }
 

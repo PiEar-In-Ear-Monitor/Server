@@ -19,13 +19,10 @@ namespace PiEar {
          * @param size_of_buffer Size of the buffer.
          * @param size_of_chunk Size of each chunk of the buffer.
          */
-        explicit ringBuffer(int size_of_buffer, int size_of_chunk) :
+        explicit ringBuffer(int size_of_buffer, int size_of_chunk) : // NOLINT(bugprone-easily-swappable-parameters)
                 _size(size_of_buffer),
                 _buffer((T*)malloc(sizeof(T) * size_of_buffer)),
-                _readIndex(0),
-                _writeIndex(0),
                 _chunkSize(size_of_chunk),
-                _chunkCount(0),
                 _mutex() {
             if (_buffer == nullptr) {
                 PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Failed to allocate memory for ring buffer.";
@@ -62,7 +59,7 @@ namespace PiEar {
          * Freeing the returned chunk is the responsibility of the caller.
          * @return The chunk at the read index.
          */
-        T* pop() {
+        auto pop() -> T* {
             T *item = static_cast<T *>(malloc(sizeof(T) * _chunkSize));
             std::lock_guard<std::mutex> lock(_mutex);
             if (_chunkCount == 0) {
@@ -79,14 +76,14 @@ namespace PiEar {
          * terms of how many objects it can hold.
          * @return The size of the buffer.
          */
-        [[nodiscard]] int size() const {
+        [[nodiscard]] auto size() const -> int {
             return _size;
         }
         /**
          * Returns the number of chunks the buffer can hold.
          * @return The number of chunks.
          */
-        [[nodiscard]] int capacity() const {
+        [[nodiscard]] auto capacity() const -> int {
             return _size / _chunkSize;
         }
         /**
@@ -94,17 +91,17 @@ namespace PiEar {
          * of how many objects it can hold.
          * @return The chunk size.
          */
-        [[nodiscard]] int chunkSize() const {
+        [[nodiscard]] auto chunkSize() const -> int {
             return _chunkSize;
         }
     private:
         const int _size;      //!< Size of the buffer.
         T *_buffer;           //!< Buffer.
-        int _readIndex;       //!< Read index.
-        int _writeIndex;      //!< Write index.
+        int _readIndex = 0;   //!< Read index.
+        int _writeIndex = 0;  //!< Write index.
         std::mutex _mutex;    //!< Mutex.
         const int _chunkSize; //!< Size of each chunk.
-        int _chunkCount;      //!< Number of chunks in the buffer.
+        int _chunkCount = 0;  //!< Number of chunks in the buffer.
     };
 }
 #endif //PIEAR_SERVER_RINGBUFFER_H

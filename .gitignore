@@ -39,3 +39,5 @@
 PiEar_HTTP_Server/node_modules/.package-lock.json
 PiEar_HTTP_Server/node_modules/
 */.vscode/
+
+.idea/

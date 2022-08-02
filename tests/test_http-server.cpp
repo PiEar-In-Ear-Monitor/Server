@@ -3,7 +3,7 @@
 #include <thread>
 #include <vector>
 #include "audio.h"
-#include "channel.hpp"
+#include "channel.h"
 #include "gen_channels.hpp"
 #include "http-server.h"
 

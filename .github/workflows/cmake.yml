@@ -20,7 +20,7 @@ jobs:
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Install Boost, JSON and gtest libraries 
-      run: sudo apt-get update && sudo apt-get install -yq libboost-all-dev nlohmann-json3-dev libgtest-dev portaudio19-dev nodejs
+      run: sudo apt-get update && sudo apt-get install -yq libboost-all-dev nlohmann-json3-dev libgtest-dev portaudio19-dev nodejs libavutil-dev libswresample-dev
 
     - name: Build
       run:
