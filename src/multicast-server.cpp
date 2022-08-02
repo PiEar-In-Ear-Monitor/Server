@@ -1,8 +1,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
-#include <iostream>
 #include <string>
-#include "channel.hpp"
+#include "channel.h"
 #include "logger.h"
 #include "multicast-server.h"
 
@@ -16,7 +15,6 @@ namespace PiEar {
         socket.set_option(boost::asio::socket_base::broadcast(true));
         socket.bind(endpoint);
         try {
-            PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Starting multicast server thread...";
             boost::asio::io_service io_service;
             MulticastServer s(io_service, boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP), kill, click, channels);
             io_service.run();
@@ -30,19 +28,29 @@ namespace PiEar {
     }
     void PiEar::MulticastServer::server_loop(const boost::system::error_code& error) {
         std::thread send_click_stream_thread([this] {send_click_stream();});
-        auto data_with_channel = new uint16_t[channels->back()->buffer.chunkSize() + 1];
+        auto data_with_channel = new uint16_t[BUFFER_CHUNK_SIZE + 1];
+        bool setup_done = false;
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Multicast server waiting for channels to be setup";
+        while (!setup_done) {
+            setup_done = true;
+            for (auto channel : *channels) {
+                if (!channel->swr_ctx_init()) {
+                    setup_done = false;
+                }
+            }
+        }
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Multicast server ready";
         while(!(*kill_server)) {
             for (auto channel : *channels) {
                 if (channel->enabled) {
                     data_with_channel[0] = channel->piear_id;
-                    uint16_t *data = channel->buffer.pop();
-                    if (data == nullptr) {
+                    PiEar::return_data data = channel->get_sample();
+                    if (data.data == nullptr) {
                         continue;
                     }
-                    memcpy(data_with_channel + 1, data, sizeof(uint16_t) * (channel->buffer.chunkSize()));
-                    free(data);
+                    memcpy(data_with_channel + 1, data.data, sizeof(uint16_t) * data.frames);
                     mutex_.lock();
-                    socket_.send_to(boost::asio::buffer(data_with_channel, sizeof(uint16_t) * (channel->buffer.chunkSize() + 1)), endpoint_);
+                    socket_.send_to(boost::asio::buffer(data_with_channel, sizeof(uint16_t) * (BUFFER_CHUNK_SIZE + 1)), endpoint_);
                     mutex_.unlock();
                 }
             }
@@ -50,7 +58,6 @@ namespace PiEar {
         delete[] data_with_channel;
         send_click_stream_thread.join();
     }
-
     void MulticastServer::send_click_stream() {
         auto click_true = new uint16_t[2]{0, 1};
         auto click_false = new uint16_t[2]{0, 0};
@@ -59,7 +66,9 @@ namespace PiEar {
                 mutex_.lock();
                 socket_.send_to(boost::asio::buffer(click_true, 2 * sizeof(uint16_t)), endpoint_);
                 mutex_.unlock();
-                while (*click);
+                while (*click) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                }
             }
         }
         delete[] click_true;

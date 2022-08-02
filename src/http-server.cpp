@@ -9,13 +9,12 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include "channel.hpp"
+#include "channel.h"
 #include "http-server.h"
 #include "logger.h"
 
 namespace PiEar {
     void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm, const std::string& ws_secret, int delay, const std::vector<PiEar::audioDevice>& devices, std::atomic<int> *device_index, std::atomic<bool> *new_audio_device) {
-        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Starting HTTP server thread...";
         int server_thread = fork();
         if (!server_thread) {
             std::vector<char*> server_args;
@@ -40,7 +39,7 @@ namespace PiEar {
                 req.set("shared-secret", ws_secret);
             }
         ));
-        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Connecting to HTTP server...";
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Connecting to http server...";
         ws.handshake(host + ":" + port, "/");
         for (auto &chan : *channels) {
             ws.write(boost::asio::buffer(std::string(*chan)));
@@ -64,7 +63,7 @@ namespace PiEar {
                 os << boost::beast::make_printable(stream_buffer.data());
                 input_string = os.str();
                 nlohmann::json json_parsed = nlohmann::json::parse(input_string);
-                PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Received message from HTTP server: " << json_parsed;
+                PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::debug) << "Received message from http server: " << json_parsed;
                 if (!json_parsed["bpm"].empty()) {
                     *bpm = json_parsed["bpm"];
                 } else if (!json_parsed["device"].empty()) {
@@ -79,17 +78,24 @@ namespace PiEar {
                         }
                     }
                 }
-            } catch (std::exception const &e) {}
+            } catch (std::exception const &e) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+                if (!*kill_switch) {
+                    PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Error reading from HTTP server: " << e.what();
+                }
+            }
         }
         kill_server_thread.join();
     }
     void kill_server_waiter(int to_kill, std::atomic<bool> *kill_server) {
-        while (!*kill_server) std::this_thread::yield();
+        while (!*kill_server) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        }
         kill(to_kill, SIGTERM);
     }
-    std::string server_executable_dir() {
+    auto server_executable_dir() -> std::string {
         std::string local_location = "../webserver/";
-        std::string remote_location = "/usr/share/piear/webserver/";
+        std::string remote_location = "/usr/share/piear/webserver/"; // TODO: Make this cross-platform
         if (std::ifstream(local_location).good()) {
             return local_location;
         } else if (std::ifstream(remote_location).good()) {

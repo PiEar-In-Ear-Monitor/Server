@@ -4,13 +4,13 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include "channel.hpp"
+#include "channel.h"
 #include "gen_channels.hpp"
 #include "load-data.hpp"
 #include "task.hpp"
 
 #define DIRECTORY_SEPARATOR "/"
-std::vector<PiEar::channel*> *load_from_file(const std::string& path, int &pass_audio_index) {
+auto load_from_file(const std::string& path, int &pass_audio_index) -> std::vector<PiEar::channel*> * {
     std::string json = PiEar::get_file_contents(path);
     nlohmann::json data = nlohmann::json::parse(json);
     pass_audio_index = data["audio_index"];
@@ -23,9 +23,12 @@ TEST(testPiEar, task_load) {
     if (std::filesystem::exists(full_path)) {
         std::filesystem::remove(full_path);
     }
-    auto task = PiEar::task(cha, full_path, 1);
+    std::atomic<int> audio_index(-1);
+    auto task = PiEar::task(cha, full_path, 1, &audio_index);
     task.async_run_save_task();
-    while (!std::filesystem::exists(full_path)) std::this_thread::yield();
+    while (!std::filesystem::exists(full_path)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
     sleep(1);
     int received_audio_index;
     std::vector<PiEar::channel *> *data = load_from_file(full_path, received_audio_index);
@@ -41,7 +44,7 @@ TEST(testPiEar, task_load) {
             break;
         }
         generate_channels(2, cha);
-        task.audio_index = 11;
+        *task.audio_index = 11;
         sleep(2);
         for (auto channel: *data) {
             delete channel;

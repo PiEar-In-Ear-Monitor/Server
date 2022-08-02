@@ -10,18 +10,18 @@
 #include <thread>
 #include <utility>
 #include <vector>
-#include "channel.hpp"
+#include "channel.h"
 
 namespace PiEar {
     class task {
     public:
         std::vector<PiEar::channel *> *channels; //!< Channels to save
         std::string file_path;                   //!< File path to save to
-        std::atomic<bool> kill_task;                          //!< When set true, the task will not reschedule itself
+        std::atomic<bool> kill_task = false;     //!< When set true, the task will not reschedule itself
         std::thread save_task_thread;            //!< Thread to run the task on
-        bool is_running;                         //!< Is the task running?
+        bool is_running = false;                 //!< Is the task running?
         int save_interval;                       //!< How often to save the channels
-        int audio_index;                         //!< Index of the audio channel to use
+        std::atomic<int> *audio_index;           //!< Index of the audio channel to use
         /**
          * function that initializes `save_task` for its
          * first run, also loads audio_index.
@@ -30,8 +30,9 @@ namespace PiEar {
          * of pointers to PiEar::channel objects.
          * @param std::string file_path to save file
          * @param int Is the time between writing to the save file
+         * @param std::atomic<int>* Is a pointer to an atomic integer
          */
-        task(std::vector<PiEar::channel *> *c, std::string f, int save_pause);
+        task(std::vector<PiEar::channel *> *c, std::string f, int save_pause, std::atomic<int> *ai);
         /**
          * function begins the task
          */
@@ -55,7 +56,7 @@ namespace PiEar {
          * }
          * @return std::string representation of a JSON object
          */
-        std::string create_json();
+        auto create_json() -> std::string;
         /**
          * Task that saves `channels`
          */
@@ -79,7 +80,7 @@ namespace PiEar {
 //    This function cannot be const
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "readability-make-member-function-const"
-    std::string task::create_json() {
+    auto task::create_json() -> std::string {
         std::ostringstream s;
         s << "{\"channels\":[";
         for (auto it = std::begin(*this->channels); it != std::end(*this->channels); it++) {
@@ -88,10 +89,9 @@ namespace PiEar {
                 s << ',';
             }
         }
-        s << "],\"audio_index\":" << this->audio_index << "}";
+        s << "],\"audio_index\":" << *(this->audio_index) << "}";
         return s.str();
     }
-#pragma clang diagnostic pop
     void task::load_from_file() {
         std::ifstream fs;
         fs.open(this->file_path.c_str());
@@ -116,8 +116,10 @@ namespace PiEar {
             }
         }
     }
-    task::task(std::vector<PiEar::channel*> *c, std::string f, int save_pause)
-            : channels(c), file_path(std::move(f)), kill_task(false), is_running(false), save_interval(save_pause) {
+#pragma clang diagnostic pop
+    task::task(std::vector<PiEar::channel*> *c, std::string f, int save_pause, std::atomic<int> *ai)
+            : channels(c), file_path(std::move(f)), save_interval(save_pause), audio_index(ai) {
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Loading settings from: " << this->file_path;
         std::ifstream fs;
         if (std::filesystem::exists(this->file_path)) {
             fs.open(this->file_path.c_str());
@@ -126,10 +128,10 @@ namespace PiEar {
                 std::getline(fs, json_file_contents);
                 fs.close();
                 auto json_obj = nlohmann::json::parse(json_file_contents);
-                this->audio_index = json_obj["audio_index"];
+                *(this->audio_index) = json_obj["audio_index"];
             }
         } else {
-            this->audio_index = -1;
+            *(this->audio_index) = -1;
             std::filesystem::create_directory(std::filesystem::path(this->file_path).parent_path());
         }
     }

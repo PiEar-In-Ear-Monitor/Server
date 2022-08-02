@@ -5,13 +5,13 @@
 #include <string>
 #include <vector>
 #include "audio.h"
-#include "channel.hpp"
+#include "channel.h"
 
 namespace PiEar {
     /**
      * @brief This runs the webserver.
      * @details On port 9090, this webserver is a getter/setter for the labels and cpm
-     * @param std::atomic<bool> This is the kill swtitch for the http server
+     * @param std::atomic<bool> This is the kill switch for the http server
      * @param std::vector<PiEar::channel*> This is the vector of channels to use.
      * @param std::atomic<int> This is the BPM.
      * @param const std::string This is the secret for the websocket.
@@ -31,7 +31,7 @@ namespace PiEar {
      * @brief This is used to get the webserver's dir.
      * @return std::string This is the webserver's dir.
      */
-    std::string server_executable_dir();
+    auto server_executable_dir() -> std::string;
 }
 
 #endif //PIEAR_SERVER_HTTP_SERVER_H

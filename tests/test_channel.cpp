@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 #include <string>
-#include "channel.hpp"
+#include "channel.h"
 #include "gen_channels.hpp"
+
+// TODO: Test audio push/pop
 
 TEST(testPiEar, channel_basic_usage) {
     PiEar::channel to_test(1, std::string("Hello World"));
@@ -44,6 +46,12 @@ TEST(testPiEar, channel_string_test) {
     to_test.channel_name = PiEar::channel::base64_encode("New Name");
     EXPECT_EQ(to_test.channel_name, std::string("TmV3IE5hbWU="));
     EXPECT_EQ((std::string)to_test, std::string("{\"piear_id\":4,\"channel_name\":\"TmV3IE5hbWU=\",\"enabled\":false}"));
+}
+TEST(testPiEar, channel_base64_encode_test) {
+    EXPECT_EQ(PiEar::channel::base64_encode("Hello World"), std::string("SGVsbG8gV29ybGQ="));
+    EXPECT_EQ(PiEar::channel::base64_encode(""), std::string(""));
+    EXPECT_EQ(PiEar::channel::base64_encode("\0"), std::string(""));
+    EXPECT_EQ(PiEar::channel::base64_encode("😀"), std::string("8J+YgA=="));
 }
 TEST(testPiEar, channel_gen_channel_test) {
     std::vector<PiEar::channel*> *to_test = generate_channels(4);
