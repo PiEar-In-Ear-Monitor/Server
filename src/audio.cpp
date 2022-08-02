@@ -18,7 +18,6 @@ namespace PiEar {
         free(tmp_buffer);
     }
     void Audio::audio_thread() {
-        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Loading audio device";
         const PaDeviceInfo* defaultDeviceInfo = Pa_GetDeviceInfo(audio_index);
         PaStream* stream;
         if (defaultDeviceInfo->maxInputChannels > channels->size()) {
@@ -58,6 +57,7 @@ namespace PiEar {
         while(!(*kill)){
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Closing audio stream";
         err = Pa_CloseStream( stream );
         if( err != paNoError ) {
             PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Error closing audio stream";
@@ -106,7 +106,6 @@ namespace PiEar {
         return devices;
     }
 #pragma clang diagnostic pop
-
     void Audio::set_audio_device(int index) {
         if (this->audio_index < 0 || this->audio_index >= Pa_GetDeviceCount()) {
             this->audio_index = Pa_GetDefaultInputDevice();

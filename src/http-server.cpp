@@ -15,7 +15,6 @@
 
 namespace PiEar {
     void mainloop_http_server(std::atomic<bool> *kill_switch, std::vector<channel*> *channels, std::atomic<int> *bpm, const std::string& ws_secret, int delay, const std::vector<PiEar::audioDevice>& devices, std::atomic<int> *device_index, std::atomic<bool> *new_audio_device) {
-        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Starting HTTP server thread...";
         int server_thread = fork();
         if (!server_thread) {
             std::vector<char*> server_args;
@@ -40,7 +39,7 @@ namespace PiEar {
                 req.set("shared-secret", ws_secret);
             }
         ));
-        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Connecting to HTTP server...";
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Connecting to http server...";
         ws.handshake(host + ":" + port, "/");
         for (auto &chan : *channels) {
             ws.write(boost::asio::buffer(std::string(*chan)));
@@ -64,7 +63,7 @@ namespace PiEar {
                 os << boost::beast::make_printable(stream_buffer.data());
                 input_string = os.str();
                 nlohmann::json json_parsed = nlohmann::json::parse(input_string);
-                PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Received message from HTTP server: " << json_parsed;
+                PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::debug) << "Received message from http server: " << json_parsed;
                 if (!json_parsed["bpm"].empty()) {
                     *bpm = json_parsed["bpm"];
                 } else if (!json_parsed["device"].empty()) {

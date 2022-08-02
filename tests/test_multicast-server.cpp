@@ -68,6 +68,7 @@ namespace PiEar::Test {
     TEST(testPiEar, multicast_server) {
         std::vector<PiEar::channel *> *channels = generate_channels(1);
         channels->back()->piear_id = 1;
+        channels->back()->setup_swr_ctx(FINAL_SAMPLE_RATE);
         std::atomic<bool> click = false;
         std::atomic<bool> kill = false;
         auto data = (uint16_t *)malloc(sizeof(uint16_t) * 128);
@@ -75,7 +76,7 @@ namespace PiEar::Test {
             for (uint16_t i = 0; i < 128; i++) {
                 data[i] = i;
             }
-            channels->back()->buffer.push(data);
+            channels->back()->add_sample(data);
         }
         free(data);
         std::thread receiverThread(multicast_receiver, MESSAGES_TO_SEND);

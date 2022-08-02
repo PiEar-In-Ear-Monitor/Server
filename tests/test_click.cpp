@@ -34,7 +34,7 @@ TEST(testPiEar, test_click) {
     std::array<int, 6> cpm_values = {999, 500, 300, 150, 120, 60};
     for (auto item : cpm_values){
         cpm = item;
-        EXPECT_NEAR(((double)cpm / (60.0 / (double)SLEEP_TIME)), run_test(&click), ceil((int)((double)cpm*MARGIN_OF_ERROR) + 0.5));
+        EXPECT_NEAR(((double)cpm / (60.0 / (double)SLEEP_TIME)), run_test(&click), ceil(((double)cpm*MARGIN_OF_ERROR) + 0.5));
     }
     end_click = true;
     click_thread.join();

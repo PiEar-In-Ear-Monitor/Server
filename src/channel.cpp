@@ -40,7 +40,7 @@ auto PiEar::channel::add_sample(uint16_t *sample) -> void {
     buffer.push(sample);
 }
 auto PiEar::channel::get_sample() -> return_data {
-    auto *converted_sample = (uint16_t *) malloc(sizeof(uint16_t) * BUFFER_CHUNK_SIZE);
+    auto *converted_sample = (uint16_t *) malloc(sizeof(uint16_t) * this->converted_sample_max); // TODO: Make some buffer pool for less malloc?
     if (converted_sample == nullptr) {
         PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Failed to allocate memory for converted sample";
         throw std::runtime_error("Failed to allocate memory for converted sample");
@@ -76,4 +76,8 @@ auto PiEar::channel::setup_swr_ctx(int s_rate) -> void {
     av_opt_set_int(swr_ctx, "out_sample_rate", FINAL_SAMPLE_RATE, 0);
     av_opt_set_sample_fmt(swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
     swr_init(swr_ctx);
+    this->converted_sample_max = av_rescale_rnd(BUFFER_CHUNK_SIZE, FINAL_SAMPLE_RATE, sample_rate, AV_ROUND_UP);
+}
+auto PiEar::channel::swr_ctx_init() ->bool {
+    return swr_ctx != nullptr;
 }

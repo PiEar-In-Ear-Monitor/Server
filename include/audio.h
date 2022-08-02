@@ -55,7 +55,7 @@ namespace PiEar {
          * @brief This function returns a std::vector of all channel names, indexes, and input channels
          * @return std::vector<std::string> A vector of channel names, indexes, and input channels.
          */
-        auto get_audio_devices() -> std::vector<audioDevice>;
+        auto static get_audio_devices() -> std::vector<audioDevice>;
         /**
          * @brief This function returns the index of the audio device to use.
          * @return int The index of the audio device to use.

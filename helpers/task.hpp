@@ -119,6 +119,7 @@ namespace PiEar {
 #pragma clang diagnostic pop
     task::task(std::vector<PiEar::channel*> *c, std::string f, int save_pause, std::atomic<int> *ai)
             : channels(c), file_path(std::move(f)), save_interval(save_pause), audio_index(ai) {
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Loading settings from: " << this->file_path;
         std::ifstream fs;
         if (std::filesystem::exists(this->file_path)) {
             fs.open(this->file_path.c_str());

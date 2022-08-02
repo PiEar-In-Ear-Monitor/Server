@@ -23,7 +23,8 @@ TEST(testPiEar, task_load) {
     if (std::filesystem::exists(full_path)) {
         std::filesystem::remove(full_path);
     }
-    auto task = PiEar::task(cha, full_path, 1);
+    std::atomic<int> audio_index(-1);
+    auto task = PiEar::task(cha, full_path, 1, &audio_index);
     task.async_run_save_task();
     while (!std::filesystem::exists(full_path)) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -43,7 +44,7 @@ TEST(testPiEar, task_load) {
             break;
         }
         generate_channels(2, cha);
-        task.audio_index = 11;
+        *task.audio_index = 11;
         sleep(2);
         for (auto channel: *data) {
             delete channel;

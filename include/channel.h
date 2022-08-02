@@ -29,6 +29,7 @@ namespace PiEar {
         ringBuffer<uint16_t> buffer;   //!< Ring buffer for the channel
         SwrContext *swr_ctx = nullptr; //!< Swr context for the channel
         int sample_rate = -1;          //!< Sample rate of the channel
+        int converted_sample_max = -1;  //!< Maximum number of samples that can be converted
     public:
         /**
          * @param int piear_id
@@ -76,6 +77,11 @@ namespace PiEar {
          * @param sample_rate The sample rate to convert to
          */
         auto setup_swr_ctx(int sample_rate) -> void;
+        /**
+         * @brief Returns true if swr_ctx is set up
+         * @return bool True if swr_ctx is set up
+         */
+        auto swr_ctx_init() ->bool;
         /**
          * The default `int` representation is to
          * return the piear_id of the channel
