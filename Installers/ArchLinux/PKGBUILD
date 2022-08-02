@@ -1,6 +1,6 @@
 # Maintainer: Alex O'Connor <Alex.nderOConnor@gmail.com>
 pkgname=piear
-pkgver=0.6.1
+pkgver=0.7.0
 pkgrel=1
 pkgdesc="A Software based in-ear solution"
 arch=('x86_64')
@@ -20,7 +20,7 @@ install=
 changelog=
 source=("$pkgname-$pkgver.tar.gz::https://github.com/PiEar-In-Ear-Monitor/Server/archive/refs/tags/v$pkgver.tar.gz")
 noextract=()
-sha256sums=("1da71b6b6dddacd1cb5c2eb94658fe49356f6d621a6be0dba0a2b881ac20a015")
+sha256sums=("f7b12d9355de81d1cefb7d93eef8c8695f2e0abb3689e850ead5f8bc925ba206")
 validpgpkeys=()
 prepare() {
     tar -xvf "$pkgname-$pkgver.tar.gz"
