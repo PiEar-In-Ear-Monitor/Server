@@ -39,6 +39,7 @@ namespace PiEar {
                 }
             }
         }
+        int bufferBufferSize = sizeof(uint16_t) * (BUFFER_CHUNK_SIZE + 1);
         PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Multicast server ready";
         while(!(*kill_server)) {
             for (auto channel : *channels) {
@@ -50,7 +51,7 @@ namespace PiEar {
                     }
                     memcpy(data_with_channel + 1, data.data, sizeof(uint16_t) * data.frames);
                     mutex_.lock();
-                    socket_.send_to(boost::asio::buffer(data_with_channel, sizeof(uint16_t) * (BUFFER_CHUNK_SIZE + 1)), endpoint_);
+                    socket_.send_to(boost::asio::buffer(data_with_channel, bufferBufferSize), endpoint_);
                     mutex_.unlock();
                 }
             }
