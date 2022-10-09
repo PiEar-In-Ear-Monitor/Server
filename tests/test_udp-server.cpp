@@ -7,7 +7,7 @@
 #include <vector>
 #include "channel.h"
 #include "gen_channels.hpp"
-#include "multicast-server.h"
+#include "udp-server.h"
 
 enum {
 MESSAGES_TO_SEND = 5
@@ -18,11 +18,11 @@ namespace PiEar::Test {
     public:
         receiver(boost::asio::io_context& io_context, const boost::asio::ip::address& listen_address, int message_count)
                 : socket_(io_context), data_() {
-            boost::asio::ip::udp::endpoint listen_endpoint(listen_address, MULTICAST_SERVER_PORT);
+            boost::asio::ip::udp::endpoint listen_endpoint(listen_address, UDP_SERVER_PORT);
             socket_.open(listen_endpoint.protocol());
             socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
             socket_.bind(listen_endpoint);
-            socket_.set_option(boost::asio::ip::multicast::join_group(boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP)));
+            socket_.set_option(boost::asio::ip::multicast::join_group(boost::asio::ip::address::from_string(UDP_SERVER_GROUP)));
             expectedMessage = (uint16_t*) malloc(sizeof(uint16_t) * 128);
             for (uint16_t i = 0; i < 128; ++i) {
                 expectedMessage[i] = i;
@@ -80,7 +80,7 @@ namespace PiEar::Test {
         }
         free(data);
         std::thread receiverThread(multicast_receiver, MESSAGES_TO_SEND);
-        std::thread multicastThread(PiEar::mainloop_multicast_server, channels, &click, &kill);
+        std::thread multicastThread(PiEar::mainloop_udp_server, channels, &click, &kill);
         sleep(1);
         kill = true;
         multicastThread.join();
@@ -90,8 +90,8 @@ namespace PiEar::Test {
     }
 //    TEST(testPiEar, data_compression) {
 //        std::string uncompressed = "This is a test message";
-//        std::string compressed = PiEar::MulticastServer::compress(&uncompressed);
-//        std::string uncompressed2 = PiEar::MulticastServer::decompress(&compressed);
+//        std::string compressed = PiEar::UdpServer::compress(&uncompressed);
+//        std::string uncompressed2 = PiEar::UdpServer::decompress(&compressed);
 //        EXPECT_EQ(uncompressed, uncompressed2);
 //    }
 }

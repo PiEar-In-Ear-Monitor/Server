@@ -9,7 +9,7 @@
 #include "click.h"
 #include "http-server.h"
 #include "logger.h"
-#include "multicast-server.h"
+#include "udp-server.h"
 #include "task.hpp"
 
 // For getting the home directory.
@@ -17,7 +17,7 @@
 #include <pwd.h>
 #include <unistd.h>
 
-#define PIEAR_SETTINGS_FILE ".config/piear/piear_settings.json"
+#define PIEAR_SETTINGS_FILE "/.config/piear/piear_settings.json"
 
 namespace PiEar {
     enum {
@@ -58,8 +58,8 @@ namespace PiEar {
             this->start_click_thread();
             PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Starting http server...";
             this->start_http_thread();
-            PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Starting multicast server...";
-            this->start_multicast_thread();
+            PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Starting udp server...";
+            this->start_udp_thread();
             PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Starting audio server...";
             this->start_audio_thread();
         }
@@ -74,8 +74,8 @@ namespace PiEar {
             stop_http_thread();
             PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Joining audio thread";
             stop_audio_thread();
-            PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Joining multicast thread";
-            stop_multicast_thread();
+            PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Joining udp thread";
+            stop_udp_thread();
             PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Changing audio source to " << audio_index;
             audio->set_audio_device(audio_index);
             if (audio_index != audio->get_audio_index()) {
@@ -91,7 +91,7 @@ namespace PiEar {
             task->load_from_file();
             task->async_run_save_task();
             start_http_thread();
-            start_multicast_thread();
+            start_udp_thread();
             start_audio_thread();
         }
         auto end_everything() -> void {
@@ -101,8 +101,8 @@ namespace PiEar {
             stop_http_thread();
             PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Joining audio thread";
             stop_audio_thread();
-            PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Joining multicast thread";
-            stop_multicast_thread();
+            PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Joining udp thread";
+            stop_udp_thread();
             PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Joining click thread";
             stop_click_thread();
         }
@@ -143,15 +143,15 @@ namespace PiEar {
             PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::debug) << "Generated random string: " << random_string;
             return random_string;
         }
-        std::thread multicast_thread;
-        std::atomic<bool> multicast_thread_kill;
-        void start_multicast_thread() {
-            multicast_thread_kill = false;
-            multicast_thread = std::thread(PiEar::mainloop_multicast_server, channels, &click, &multicast_thread_kill);
+        std::thread udp_thread;
+        std::atomic<bool> udp_thread_kill;
+        void start_udp_thread() {
+            udp_thread_kill = false;
+            udp_thread = std::thread(PiEar::mainloop_udp_server, channels, &click, &udp_thread_kill);
         }
-        void stop_multicast_thread() {
-            multicast_thread_kill = true;
-            multicast_thread.join();
+        void stop_udp_thread() {
+            udp_thread_kill = true;
+            udp_thread.join();
         }
         std::thread click_thread;
         std::atomic<bool> click_thread_kill;

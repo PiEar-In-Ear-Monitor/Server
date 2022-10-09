@@ -1,10 +1,10 @@
-#ifndef PIEAR_SERVER_MULTICAST_SERVER_H
-#define PIEAR_SERVER_MULTICAST_SERVER_H
+#ifndef PIEAR_SERVER_UDP_SERVER_H
+#define PIEAR_SERVER_UDP_SERVER_H
 
-#define MUTLICAST_SERVER_H_VERSION_MAJOR 1
-#define MUTLICAST_SERVER_H_VERSION_MINOR 0
-#define MULTICAST_SERVER_PORT 6666
-#define MULTICAST_SERVER_GROUP "224.0.0.69"
+#define UDP_SERVER_H_VERSION_MAJOR 1
+#define UDP_SERVER_H_VERSION_MINOR 0
+#define UDP_SERVER_PORT 6666
+#define UDP_SERVER_GROUP "224.0.0.69"
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_service.hpp>
@@ -21,21 +21,20 @@ namespace PiEar {
      * @param click_stream  Pointer to the click's stream
      * @param end Pointer to a bool that, when set to false, will kill the server
      */
-    void mainloop_multicast_server(std::vector<channel*>*, std::atomic<bool>*, std::atomic<bool>*);
+    void mainloop_udp_server(std::vector<channel*>*, std::atomic<bool>*, std::atomic<bool>*);
     /**
      * This is the class for Boost to use
      */
-    class MulticastServer {
+    class UdpServer {
     public:
         /**
-         * This is the constructor for the multicast server
+         * This is the constructor for the udp server
          *
-         * @param io_service Service to use
-         * @param address IP address to use
+         * @param io_context Context to use
          * @param kill Pointer to a bool that, when set to true, will kill the server
          * @param channels Pointer to all channels
          */
-        MulticastServer(boost::asio::io_service&, const boost::asio::ip::address&, std::atomic<bool>*, std::atomic<bool>*, std::vector<channel*>*);
+        UdpServer(boost::asio::io_context&, std::atomic<bool>*, std::atomic<bool>*, std::vector<channel*>*);
         // TODO: Compress the data
 //        /**
 //         * Compress data with gzip
@@ -52,9 +51,8 @@ namespace PiEar {
     private:
         /**
          * This is the function that will be called when the server is started
-         * @param ec Error code
          */
-        void server_loop(const boost::system::error_code&);
+        void server_loop();
         /**
          * This is the function sends the click stream
          * @param ec Error code
@@ -68,4 +66,4 @@ namespace PiEar {
         std::mutex mutex_;                        //!< Mutex to use
     };
 }
-#endif //PIEAR_SERVER_MULTICAST_SERVER_H
+#endif //PIEAR_SERVER_UDP_SERVER_H

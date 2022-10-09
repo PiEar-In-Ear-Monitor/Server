@@ -3,31 +3,24 @@
 #include <string>
 #include "channel.h"
 #include "logger.h"
-#include "multicast-server.h"
+#include "udp-server.h"
 
 namespace PiEar {
-    void mainloop_multicast_server(std::vector<channel*> *channels, std::atomic<bool> *click, std::atomic<bool> *kill) {
-        boost::asio::io_context io_context;
-        boost::asio::ip::udp::endpoint endpoint(boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP), MULTICAST_SERVER_PORT);
-        boost::asio::ip::udp::socket socket(io_context, endpoint.protocol());
-        socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-        socket.set_option(boost::asio::ip::multicast::join_group(endpoint.address()));
-        socket.set_option(boost::asio::socket_base::broadcast(true));
-        socket.bind(endpoint);
+    void mainloop_udp_server(std::vector<channel*> *channels, std::atomic<bool> *click, std::atomic<bool> *kill) {
         try {
-            boost::asio::io_service io_service;
-            MulticastServer s(io_service, boost::asio::ip::address::from_string(MULTICAST_SERVER_GROUP), kill, click, channels);
-            io_service.run();
+            boost::asio::io_context io_context;
+            UdpServer s(io_context, kill, click, channels);
+            io_context.run();
         } catch (std::exception& e) {
             PIEAR_LOG_WITH_FILE_LOCATION(boost::log::trivial::error) << "Multicast server failed: " << e.what();
         }
     }
-    PiEar::MulticastServer::MulticastServer(boost::asio::io_service& io_service, const boost::asio::ip::address& multicast_address, std::atomic<bool> *kill, std::atomic<bool> *click, std::vector<channel*> *channels):
-        endpoint_(multicast_address, MULTICAST_SERVER_PORT), socket_(io_service, endpoint_.protocol()), kill_server(kill), click(click), channels(channels) {
-        server_loop(boost::system::error_code());
+    PiEar::UdpServer::UdpServer(boost::asio::io_context& io_context, std::atomic<bool> *kill, std::atomic<bool> *click, std::vector<channel*> *channels):
+            socket_(io_context, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), UDP_SERVER_PORT)), kill_server(kill), click(click), channels(channels) {
+        server_loop();
     }
-    void PiEar::MulticastServer::server_loop(const boost::system::error_code& error) {
-        std::thread send_click_stream_thread([this] {send_click_stream();});
+    void PiEar::UdpServer::server_loop() {
+//        std::thread send_click_stream_thread([this] {send_click_stream();});
         auto data_with_channel = new uint16_t[BUFFER_CHUNK_SIZE + 1];
         bool setup_done = false;
         PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Multicast server waiting for channels to be setup";
@@ -40,6 +33,7 @@ namespace PiEar {
             }
         }
         int bufferBufferSize = sizeof(uint16_t) * (BUFFER_CHUNK_SIZE + 1);
+        socket_.receive_from(boost::asio::buffer(data_with_channel, bufferBufferSize), endpoint_);
         PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::trace) << "Multicast server ready";
         while(!(*kill_server)) {
             for (auto channel : *channels) {
@@ -57,9 +51,9 @@ namespace PiEar {
             }
         }
         delete[] data_with_channel;
-        send_click_stream_thread.join();
+//        send_click_stream_thread.join();
     }
-    void MulticastServer::send_click_stream() {
+    void UdpServer::send_click_stream() {
         auto click_true = new uint16_t[2]{0, 1};
         auto click_false = new uint16_t[2]{0, 0};
         while(!(*kill_server)) {
@@ -75,7 +69,7 @@ namespace PiEar {
         delete[] click_true;
         delete[] click_false;
     }
-//    boost::asio::mutable_buffer PiEar::MulticastServer::compress(const uint16_t *stream) {
+//    boost::asio::mutable_buffer PiEar::UdpServer::compress(const uint16_t *stream) {
 //        boost::iostreams::stream< boost::iostreams::array_source > source (stream, 128);
 //        boost::iostreams::filtering_streambuf<boost::iostreams::input> in;
 //        in.push(boost::iostreams::gzip_compressor());
@@ -85,7 +79,7 @@ namespace PiEar {
 //        boost::iostreams::copy(in, compressed_string);
 //        return compressed_string.str();
 //    }
-//    boost::asio::mutable_buffer PiEar::MulticastServer::decompress(const uint16_t *stream) {
+//    boost::asio::mutable_buffer PiEar::UdpServer::decompress(const uint16_t *stream) {
 //        boost::iostreams::filtering_streambuf<boost::iostreams::input> in;
 //        in.push(boost::iostreams::gzip_decompressor());
 //        std::istringstream compressed_string(*stream);
