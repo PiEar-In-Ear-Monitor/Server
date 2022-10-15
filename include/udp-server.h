@@ -4,7 +4,7 @@
 #define UDP_SERVER_H_VERSION_MAJOR 1
 #define UDP_SERVER_H_VERSION_MINOR 0
 #define UDP_SERVER_PORT 6666
-#define UDP_SERVER_GROUP "224.0.0.69"
+#define UDP_SERVER_GROUP "10.26.78.204"
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_service.hpp>

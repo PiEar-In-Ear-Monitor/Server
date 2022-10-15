@@ -52,7 +52,7 @@ namespace PiEar {
         std::stringstream final_string;
         final_string << "{\"bpm\":" << *bpm << ", \"active_device\":" << *device_index << "}";
         ws.write(boost::asio::buffer(final_string.str()));
-
+        PIEAR_LOG_WITHOUT_FILE_LOCATION(boost::log::trivial::info) << "Connected to http server";
         std::thread kill_server_thread(kill_server_waiter, server_thread, kill_switch);
         std::string input_string;
         while (!*kill_switch) {
