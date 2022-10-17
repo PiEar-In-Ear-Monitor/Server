@@ -4,7 +4,7 @@
 #define UDP_SERVER_H_VERSION_MAJOR 1
 #define UDP_SERVER_H_VERSION_MINOR 0
 #define UDP_SERVER_PORT 6666
-#define UDP_SERVER_GROUP "10.26.78.204"
+#define UDP_SERVER_GROUP "10.26.78.122"
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_service.hpp>
@@ -60,7 +60,7 @@ namespace PiEar {
         void send_click_stream();
         std::atomic<bool>* kill_server;           //!< Pointer to a bool that, when set to true, will kill the server
         std::atomic<bool>* click;                 //!< Pointer to the click
-        boost::asio::ip::udp::endpoint endpoint_; //!< Endpoint to use
+        boost::asio::ip::udp::endpoint endpoint_ = boost::asio::ip::udp::endpoint(boost::asio::ip::make_address(UDP_SERVER_GROUP), 6666); //!< Endpoint to use
         boost::asio::ip::udp::socket socket_;     //!< Socket to use
         std::vector<channel*> *channels;          //!< Pointer to all channels
         std::mutex mutex_;                        //!< Mutex to use
